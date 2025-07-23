@@ -1,0 +1,204 @@
+ BELLHOP/BELLHOP3D
+
+ BELLHOP3D- True 3D profile                                                      
+ frequency =   1000.     Hz
+
+ Dummy parameter NMedia =            1
+
+     Hexahedral approximation to SSP
+     Attenuation units: dB/wavelength
+ AttenW 
+     VACUUM
+
+ Depth =      80.00 m
+
+ Sound speed profile:
+      z         alphaR      betaR     rho        alphaI     betaI
+     (m)         (m/s)      (m/s)   (g/cm^3)      (m/s)     (m/s)
+
+      0.00      1500.00      0.00     1.00       0.0000    0.0000
+     10.00      1500.00      0.00     1.00       0.0000    0.0000
+     20.00      1500.00      0.00     1.00       0.0000    0.0000
+     30.00      1500.00      0.00     1.00       0.0000    0.0000
+     40.00      1500.00      0.00     1.00       0.0000    0.0000
+     80.00      1500.00      0.00     1.00       0.0000    0.0000
+
+ Reading sound speed profile from file
+ Number of points in x =           21
+ Number of points in y =           21
+ Number of points in z =           11
+
+
+                                 ( RMS roughness =   0.00     )
+     Bathymetry file selected
+     ACOUSTO-ELASTIC half-space
+     80.00      1550.00      0.00     1.50       0.5000    0.0000
+
+ __________________________________________________________________________
+
+    Number of Source   x-coordinates, Sx =            1
+    Source   x-coordinates, Sx (km)
+                 0.00000    
+
+
+ __________________________________________________________________________
+
+    Number of Source   y-coordinates, Sy =            1
+    Source   y-coordinates, Sy (km)
+                 0.00000    
+
+
+ __________________________________________________________________________
+
+    Number of Source   z-coordinates, Sz =            1
+    Source   z-coordinates, Sz (m)
+                 10.0000    
+
+
+ __________________________________________________________________________
+
+    Number of Receiver z-coordinates, Rz =          200
+    Receiver z-coordinates, Rz (m)
+                 0.00000      0.402010      0.804020       1.20603    
+   1.60804       2.01005       2.41206       2.81407       3.21608    
+   3.61809    
+          ... 
+   80.0000    
+
+
+ __________________________________________________________________________
+
+    Number of Receiver r-coordinates, Rr =         1000
+    Receiver r-coordinates, Rr (km)
+                 0.00000      0.150150E-02  0.300300E-02  0.450450E-02
+  0.600601E-02  0.750751E-02  0.900901E-02  0.105105E-01  0.120120E-01
+  0.135135E-01
+          ... 
+   1.50000    
+
+
+ __________________________________________________________________________
+
+    Number of Receiver bearings, theta =            3
+    Receiver bearings, theta (degrees)
+                -90.0000       0.00000       90.0000    
+
+
+ Coherent TL calculation
+ Geometric hat beams in Cartesian coordinates
+ Point source (cylindrical coordinates)
+ Rectilinear receiver grid: Receivers at Rr( : ) x Rz( : )
+ N x 2D calculation (neglects horizontal refraction)
+ __________________________________________________________________________
+
+    Number of beams in elevation   =         1001
+    Beam take-off angles (degrees)
+  -89.0000      -88.8220      -88.6440      -88.4660      -88.2880    
+  -88.1100      -87.9320      -87.7540      -87.5760      -87.3980    
+          ... 
+   89.0000    
+
+ Replacing beam take-off angles, beta, with receiver bearing lines, theta
+
+    Number of beams in bearing   =            3
+    Beam take-off angles (degrees)
+  -90.0000       0.00000       90.0000    
+
+ __________________________________________________________________________
+
+
+ Step length,        deltas =   8.000     m
+
+ Maximum ray x-range, Box%x =   1550.     m
+ Maximum ray y-range, Box%y =   1550.     m
+ Maximum ray z-range, Box%z =   80.50     m
+ No beam shift in effect
+
+ __________________________________________________________________________
+
+ Using bottom-bathymetry file
+ Regular grid for a 3D run
+
+ Long format (bathymetry and geoacoustics)
+
+ Number of bathymetry points in x          21
+  -2.00000      -1.80000      -1.60000      -1.40000      -1.20000    
+  -1.00000     -0.800000     -0.600000     -0.400000     -0.200000    
+   0.00000      0.200000      0.400000      0.600000      0.800000    
+   1.00000       1.20000       1.40000       1.60000       1.80000    
+   2.00000    
+
+ Number of bathymetry points in y          21
+  -2.00000      -1.80000      -1.60000      -1.40000      -1.20000    
+  -1.00000     -0.800000     -0.600000     -0.400000     -0.200000    
+   0.00000      0.200000      0.400000      0.600000      0.800000    
+   1.00000       1.20000       1.40000       1.60000       1.80000    
+   2.00000    
+
+ Province type
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+   1   1   1
+
+ Province geoacoustic properties
+ Number of bottom provinces =            1
+
+Province  alphaR      betaR     rho        alphaI     betaI
+           (m/s)      (m/s)   (g/cm^3)      (m/s)     (m/s)
+
+    1     1550.00      0.00     1.50       0.5000    0.0000
+
+ Source coordinate
+ xs =    0.00         0.00         10.0    
+
+ Geometric beam, hat-shaped, Cart. coord.                                        
+ HalfWidth1  =    0.0000000000000000     
+ HalfWidth2  =    0.0000000000000000     
+ epsilonOPT1 =                (0.0000000000000000,0.0000000000000000)
+ epsilonOPT2 =                (0.0000000000000000,0.0000000000000000)
+ EpsMult     =    1.0000000000000000     
+
+Tracing azimuthal beam    1    -90.00
+Tracing azimuthal beam    2      0.00
+Tracing azimuthal beam    3     90.00
+
+ CPU Time =        1.19    s
