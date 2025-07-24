@@ -1,4 +1,4 @@
-function tree = traverseTree(tree, mu_parent, Sigma_parent, x_parent, y_parent, z_parent, s,action_path)
+function tree = traverseTree(tree, mu_parent, Sigma_parent, x_parent, y_parent, z_parent, s, action_path)
     if nargin < 8
         action_path = []; % Initialize action path at root
     end
@@ -15,7 +15,7 @@ function tree = traverseTree(tree, mu_parent, Sigma_parent, x_parent, y_parent, 
             % Update mu and Sigma using parent's values. Only update if a
             % feasable path
             if isfinite(x_updated) && isfinite(y_updated) && isfinite(z_updated) 
-                [~, Sigma_updated] = step_ukf_filter(nan, @(th)forward_model(th, [x_updated y_updated z_updated]), mu_parent, Sigma_parent, s.Sigma_rr);
+                [~, Sigma_updated] = step_ukf_filter(nan, @(th)forward_model(th, [x_updated y_updated z_updated], s), mu_parent, Sigma_parent, s.Sigma_rr);
             else
                 Sigma_updated=NaN(size(Sigma_parent));
             end

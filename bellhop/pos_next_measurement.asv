@@ -3,6 +3,9 @@ function data=pos_next_measurement(data,s)
 % Get index of last state
 idx=find(isfinite(data.x), 1,'last');
 
+display(idx)
+
+
 % Check if sensor management or not 
 if s.sm
 
@@ -46,7 +49,7 @@ if s.sm
         best_action = getBestActionSequence(tree);
 
         % Update the position based upon the best acction
-        [data.x(idx+1), data.y(idx+1), data.z(idx+1)] = update_pos( data.x(idx), data.y(idx), data.z(idx), s, best_action(1));
+        z[data.x(idx+1), data.y(idx+1), data.z(idx+1)] = update_pos( data.x(idx), data.y(idx), data.z(idx), s, best_action(1));
     end
 
 else

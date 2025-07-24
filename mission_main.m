@@ -1,32 +1,12 @@
 clc
 
-% Get all items in the current directory
-folder_contents = dir;
-
-% Loop through each item
-for item = folder_contents' % Transpose to loop through items correctly
-
-    % Skip if the item is a directory
-    if item.isdir
-        continue;
-    end
-
-    % Get the filename without its extension
-    [~, file_name_only, ~] = fileparts(item.name);
-
-    % Check if the filename is exactly 7 digits using a regular expression
-    if ~isempty(regexp(file_name_only, '^\d{7}$', 'once'))
-
-        % If it matches, delete the file and notify the user
-        fprintf('Deleting file: %s\n', item.name);
-        delete(item.name);
-
-    end
-end
-
+global extra_output
+extra_output = true;
 
 global units
 units = 'km';
+
+clean_files();
 
 % Load the simulation settings
 s = get_sim_settings();
@@ -47,7 +27,7 @@ writeENV3D(s.bellhop_file_name + ".env", s, data.th);
 fprintf('Wrote ENV file.\n');
 
 % Generate .bty file 
-writeBTY3D(s.bellhop_file_name + ".bty", scene, s);
+writeBTY3D(s.bellhop_file_name + ".bty", scene, data.th(1), data.th(2));
 
 % Run bellhop and draw environment
 draw_true_env(s, scene);
@@ -63,7 +43,7 @@ data = init_filter(data,s);
 % Initial Waypoints
 %InitialWaypoints = [s.InitialPosition; data.x(1) data.y(1) -7];
 
-for n=1:3
+for n=2:s.N
         
     % Print state
     fprintf('Iteration nr %d \n', n)

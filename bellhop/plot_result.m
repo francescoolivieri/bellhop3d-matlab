@@ -39,13 +39,13 @@ z_values = s.z_min:s.d_z:s.z_max;
 y_slice = mean([s.y_min, s.y_max]); % Middle y-value
 
 % Generate 2D grid at the y_slice
-[X_slice, Z_slice] = meshgrid(x_values, z_values);
-
-pos_slice = [X_slice(:), repmat(y_slice, numel(X_slice), 1), Z_slice(:)];
+% [X_slice, Z_slice] = meshgrid(x_values, z_values);
+% 
+% pos_slice = [X_slice(:), repmat(y_slice, numel(X_slice), 1), Z_slice(:)];
 
 % Full 3D grid (warning: computationally expensive)
-% [X, Y, Z] = meshgrid(x_values, y_values, z_values);
-% pos = [X(:), Y(:), Z(:)];
+[X, Y, Z] = meshgrid(x_values, y_values, z_values);
+pos = [X(:), Y(:), Z(:)];
 
 
 
@@ -56,21 +56,20 @@ pos_slice = [X_slice(:), repmat(y_slice, numel(X_slice), 1), Z_slice(:)];
 
 % Calculate prediction uncertainty
 Np = 40;
-display(size(pos_slice))
-Y = zeros(size(pos_slice, 1), Np);
+Y = zeros(size(pos, 1), Np);
 
 parfor pp = 1:Np
     th = data.th_est(:, idx) + chol(squeeze(data.Sigma_est(:, :, idx)), 'lower') * randn(size(data.th_est(:, idx)));
-    Y(:, pp) = forward_model( th, pos_slice, s);
+    Y(:, pp) = forward_model( th, pos, s);
 end
 var_tl = var(Y, [], 2);
 
 % Reshape var_tl into the same grid size as Z and R
-var_tl_grid = reshape(var_tl, size(X_slice));
+var_tl_grid = reshape(var_tl, size(X));
 
 % Create the pcolor plot (uncertainty plot, 2D slice)
 figure(5);
-pcolor(X_slice, Z_slice, sqrt(var_tl_grid)); % Z on the x-axis, R on the y-axis
+pcolor(X, Z, sqrt(var_tl_grid)); % Z on the x-axis, R on the y-axis
 shading interp; % Interpolated shading for smooth visualization
 cb=colorbar; % Add colorbar for reference
 set( gca, 'YDir', 'Reverse' )

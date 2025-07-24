@@ -1,7 +1,7 @@
 function V = prediction_error_loss(pos, mu_th, Sigma_thth, s)
 
 % Calculate parameter covariance after measurement
-[~, Sigma_thth] = step_ukf_filter(nan,@(th)forward_model(th, pos),mu_th,Sigma_thth,s.Sigma_rr);
+[~, Sigma_thth] = step_ukf_filter(nan,@(th)forward_model(th, pos, s),mu_th,Sigma_thth,s.Sigma_rr);
 
 % Create vectors for z and r
 x_values = s.x_min:s.d_x:s.x_max;

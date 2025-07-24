@@ -42,18 +42,18 @@ s.z_max=s.sim_max_depth;
 s.x_min=-1.5;
 s.x_max=1.5;
 
-s.y_min=-1.5;
-s.y_max=1.5;
+s.y_min=0;
+s.y_max=200;
 
 
 % Sensor management
-s.sm=false;                          % Sensor management on/off
+s.sm=true;                          % Sensor management on/off
 s.bayesian_opt=false;               % Use Bayesian optimization   
 
 %% Measurements position settings
-s.d_z=5;                            % Step distance depth [m]
-s.d_x=0.05;                           % Step distance range [m]
-s.d_y=0.05;                           % Step distance range [m]
+s.d_z=0.005;                            % Step distance depth [m]
+s.d_x=0.02;                           % Step distance range [m]
+s.d_y=0.02;                           % Step distance range [m]
 
 s.z_start=0.030;                       % Start depth [m]
 s.x_start=0.050;                       % Start x [m]
