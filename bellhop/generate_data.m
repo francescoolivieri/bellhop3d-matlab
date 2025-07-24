@@ -6,8 +6,8 @@ idx=find(isfinite(data.x),1,'last');
 % Get the position of the sensor
 pos=[data.x(idx) data.y(idx) data.z(idx)];
 
-display(pos)
+%display(pos)
 
 % Generate data
-data.m(idx)=forward_model(data.th,pos)+s.sigma_tl_noise*randn;
+data.m(idx) = forward_model( data.th , pos, s) + s.sigma_tl_noise*randn;
 end

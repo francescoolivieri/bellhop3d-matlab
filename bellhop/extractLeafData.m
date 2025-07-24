@@ -2,7 +2,8 @@ function leafData = extractLeafData(tree)
 
     % Initialize leafData only at the top-level call
     leafData.actions = {};
-    leafData.r = [];
+    leafData.x = [];
+    leafData.y = [];
     leafData.z = [];
     leafData.mu = {};
     leafData.Sigma = {};
@@ -22,7 +23,8 @@ function leafData = recursiveExtract(node, leafData)
     else
         % Leaf node: store data
         leafData.actions{end+1} = node.actions;
-        leafData.r(end+1) = node.r;
+        leafData.x(end+1) = node.x;
+        leafData.y(end+1) = node.y;
         leafData.z(end+1) = node.z;
         leafData.mu{end+1} = node.mu;
         leafData.Sigma{end+1} = node.Sigma;

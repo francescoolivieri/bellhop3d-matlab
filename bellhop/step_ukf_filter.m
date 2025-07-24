@@ -13,6 +13,4 @@ function [mu_th,Sigma_thth]=step_ukf_filter(y,f,mu_th,Sigma_thth,Sigma_rr)
     % Update covariance
     Sigma_thth = Sigma_thth - K * (Sigma_tltl+Sigma_rr) * K';
 
-
-
 end

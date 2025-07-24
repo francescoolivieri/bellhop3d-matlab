@@ -47,17 +47,17 @@ s.y_max=200;
 
 
 % Sensor management
-s.sm=false;                          % Sensor management on/off
+s.sm=true;                          % Sensor management on/off
 s.bayesian_opt=false;               % Use Bayesian optimization   
 
 %% Measurements position settings
 s.d_z=2;                            % Step distance depth [m]
-s.d_x=25;                           % Step distance range [m]
-s.d_y=25;                           % Step distance range [m]
+s.d_x=0.2;                           % Step distance range [m]
+s.d_y=0.2;                           % Step distance range [m]
 
-s.z_start=30;                       % Start depth [m]
-s.x_start=50;                       % Start x [m]
-s.y_start=50;                       % Start y [m]
+s.z_start=0.030;                       % Start depth [m]
+s.x_start=0.050;                       % Start x [m]
+s.y_start=0.050;                       % Start y [m]
 
 s.depth=1;                          % Depth of planing tree, i.e., how many steps ahead should we plan. 
 
@@ -68,7 +68,15 @@ s.sigma_tl_noise=1;                 % Variance of the measurement noise [dB]
 
 s.mu_th=[1600 1.5]';                % Mean of prior for theta   
 s.Sigma_th=diag([20 0.1].^2);       % Covariance of prior for theta
-s.r=1^2;                            % Filter assumed measurement noise variance [dB^2]
+s.Sigma_rr=1^2;                            % Filter assumed measurement noise variance [dB^2]
+
+
+
+
+
+
+
+
 
 
 %% UAV Settings

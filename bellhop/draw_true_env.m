@@ -1,6 +1,4 @@
-function data = draw_true_env(s, scene)
-
-data.th=s.mu_th+chol(s.Sigma_th,'lower')*randn(size(s.mu_th));
+function draw_true_env(s, scene)
 
 
 % % Generate file for the true parameters

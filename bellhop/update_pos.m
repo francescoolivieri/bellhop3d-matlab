@@ -1,16 +1,19 @@
-function [r_child, z_child] = update_pos(r_parent, z_parent,s, action)
+function [x_child, y_child, z_child] = update_pos(x_parent, y_parent, z_parent,s, action)
 
     dz=[-1 0 1 -1 0 1 -1 0 1].*s.d_z;
-    dr=[1 1 1 0 0 0 -1 -1 -1].*s.d_r;
+    dx=[-1 -1 -1 0 0 0 1 1 1].*s.d_x;
+    dy=[-1 0 1 -1 0 1 -1 0 1].*s.d_y;
 
-    r_child=dr(action)+r_parent;
+    % Apply movement
+    x_child=dx(action)+x_parent;
+    y_child=dy(action)+y_parent;
     z_child=dz(action)+z_parent;
 
-    if z_child>s.z_max || z_child<s.z_min || r_child<s.r_min || r_child>s.r_max 
-    r_child=nan;
-    z_child=nan;
+    if z_child>s.z_max || z_child<s.z_min || x_child<s.x_min || x_child>s.x_max || y_child<s.y_min || y_child>s.y_max 
+        x_child=nan;
+        y_child=nan;
+        z_child=nan;
     end
-
 
 end
 

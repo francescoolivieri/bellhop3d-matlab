@@ -3,7 +3,8 @@ function tree = generateTree(depth)
     if depth == 0
         % Base case (leaf node)
         tree.actions = [];
-        tree.r=[];
+        tree.x=[];
+        tree.y=[];
         tree.z=[];
         tree.mu = [];
         tree.Sigma = [];

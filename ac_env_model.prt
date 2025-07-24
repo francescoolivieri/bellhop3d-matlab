@@ -32,7 +32,7 @@
                                  ( RMS roughness =   0.00     )
      Bathymetry file selected
      ACOUSTO-ELASTIC half-space
-     80.00      1550.00      0.00     1.50       0.5000    0.0000
+     80.00      1580.39      0.50     1.50       0.0000    0.0000
 
  __________________________________________________________________________
 
@@ -201,4 +201,4 @@ Tracing azimuthal beam    1    -90.00
 Tracing azimuthal beam    2      0.00
 Tracing azimuthal beam    3     90.00
 
- CPU Time =        1.19    s
+ CPU Time =        1.09    s

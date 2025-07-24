@@ -1,9 +1,9 @@
-function writeENV3D(s)
+function writeENV3D(filename, s, theta)
 %WRITEENV3D Summary of this function goes here
 %   Detailed explanation goes here
 
 % Open environment file
-fid = fopen(s.bellhop_file_name + ".env", "w");
+fid = fopen(filename, "w");
 
 if fid == -1
     error('Could not open file %s for writing.', filename);
@@ -43,7 +43,7 @@ else
     fprintf(fid, '''A'' 0.0 \n');
 end
 
-fprintf(fid, ' %.2f   %.2f 0.0 1.5 0.5 /\n', s.sim_max_depth, s.bottom_ssp);
+fprintf(fid, ' %.2f   %.6f 0.5 %.6f /\n', s.sim_max_depth, theta(1) , theta(2));   %fprintf(fid, ' %.2f   %.2f 0.0 1.5 0.5 /\n', s.sim_max_depth, s.bottom_ssp);
 fprintf(fid, '1                 ! NSx number of source coordinates in x\n');
 fprintf(fid, '0.0 /             ! x coordinate of source (km)\n');
 fprintf(fid, '1                 ! NSy number of source coordinates in y\n');
@@ -65,7 +65,6 @@ fprintf(fid, '0.0  1.55 1.55 %.2f ! STEP (m), Box%%x (km) Box%%y (km) Box%%z (m)
 
 % Close the file.
 fclose(fid);
-fprintf('Wrote ENV file.\n');
 
 
 
