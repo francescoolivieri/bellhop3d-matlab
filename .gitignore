@@ -1,3 +1,7 @@
 # Bellhop Generated Files
-.ray
-.shd
+*.ray
+*.shd
+*.prt
+*.asv
+slprj/
+*.slxc
