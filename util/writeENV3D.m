@@ -54,7 +54,7 @@ fprintf(fid, '200               ! NRz\n');
 fprintf(fid, '0 %.2f /          ! Rz(1 : NRz) (m)\n', s.sim_max_depth);
 fprintf(fid, '1000              ! NRr\n');
 fprintf(fid, '0.0  1.5 /      ! Rr(1 : NRr ) (km)\n');
-fprintf(fid, '361                 ! Ntheta (number of bearings)\n');
+fprintf(fid, '4                 ! Ntheta (number of bearings)\n');
 fprintf(fid, '0.0 360.0 /         ! bearing angles (degrees)\n');
 fprintf(fid, '''CG   2''          ! ''R/C/I/S''\n');
 fprintf(fid, '1001              ! Nalpha\n');
