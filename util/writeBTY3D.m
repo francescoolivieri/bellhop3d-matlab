@@ -17,16 +17,69 @@ interp_type = 'R';
 
 % Create Bathy structure
 
-Bathy.X = scene.X(1, :);
-Bathy.Y = scene.Y(:, 1)';
-Bathy.depth = scene.floor;
+Bdry.X = scene.X(1, :);
+Bdry.Y = scene.Y(:, 1)';
+Bdry.depth = scene.floor;
 
 % write bathymetry
 try
-    writebdry3d(name_btyfil, interp_type, Bathy, bottom_ssp, bottom_density);
+    Bdry.depth( isnan( Bdry.depth ) ) = 0.0;   % remove NaNs
+
+    nx = length( Bdry.X );
+    ny = length( Bdry.Y );
+    
+    fid = fopen( name_btyfil, 'wt' );
+    %fprintf( fid, '''%s'' \n', interp_type );
+    fprintf( fid, '''RL'' \n' );
+    
+    fprintf( fid, '%i \n', nx );
+    %fprintf( fid, '%f %f /', Bathy.X( 1 ), Bathy.X( end ) );
+    
+    fprintf( fid, '%f ', Bdry.X( 1 : end ) );
+    fprintf( fid, '\n');
+    
+    fprintf( fid, '%i \n', ny );
+    %fprintf( fid, '%f %f /', Bathy.Y( 1 ), Bathy.Y( end ) );
+    fprintf( fid, '%f ', Bdry.Y( 1 : end ) );
+    fprintf( fid, '\n');
+    
+    for iy = 1 : ny
+        fprintf( fid, '%9.3f ', Bdry.depth( iy, : ) );
+        fprintf( fid, '\n');
+    end
+    
+    % if 'long' format append a matrix with province types
+    
+    if ( length( interp_type ) > 1 )
+        if ( interp_type( 2 : 2 ) == 'L' )
+            for iy = 1 : ny
+                fprintf( fid, '%3i ', Bdry.province( iy, : ) );
+                fprintf( fid, '\n');
+            end
+    
+            NProvinces = max( max( Bdry.province ) );
+            fprintf( fid, '%i \n', NProvinces );
+            for iProv = 1 : NProvinces
+                fprintf( fid, '%f ', Bdry.geotype( iProv, : ) );
+                fprintf( fid, '\n' );
+            end
+        end
+    end
+    
+    for iy = 1 : ny
+        for ix = 1 : nx
+            fprintf( fid, '1 ');
+        end
+        fprintf( fid, '\n');
+    end
+    fprintf( fid, '1 \n');
+    fprintf(fid, ' %.6f 0.5 %.6f /\n', bottom_ssp, bottom_density); %fprintf( fid, '%.2f 0 1.5 0.5 0 \n', bottom_ssp);
+    
+    fclose( fid );
+
     fprintf('Wrote BTY file. \n');
 catch ME
-    error('Failed to write bathymetry file. Make sure ''writebdry3d'' is in the path and works correctly. Error: %s', ME.message);
+    error('Failed to write bathymetry file. Error: %s', ME.message);
 end
 
 if extra_output
