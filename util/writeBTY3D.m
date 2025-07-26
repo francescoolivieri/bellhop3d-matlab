@@ -77,7 +77,7 @@ try
     
     fclose( fid );
 
-    fprintf('Wrote BTY file. \n');
+    % fprintf('Wrote BTY file. \n');
 catch ME
     error('Failed to write bathymetry file. Error: %s', ME.message);
 end

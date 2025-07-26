@@ -1,16 +1,20 @@
 function draw_true_env(s, scene)
 
+global extra_output
 
 % % Generate file for the true parameters
 % create_env_file(data.th, 'true_parameters.env')
 
-figure;
-title('SSP plot','FontSize',10);
-if s.sim_use_ssp_file
-    plotssp3d(s.bellhop_file_name + ".ssp" )
-else
-    plotssp(s.bellhop_file_name + ".env" )
+if extra_output
+    figure;
+    title('SSP plot','FontSize',10);
+    if s.sim_use_ssp_file
+        plotssp3d(s.bellhop_file_name + ".ssp" )
+    else
+        plotssp(s.bellhop_file_name + ".env" )
+    end
 end
+ 
 
 % Run bellhop to get the true transmission loss
 bellhop3d(s.bellhop_file_name);

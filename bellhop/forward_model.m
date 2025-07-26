@@ -1,18 +1,18 @@
 function tl = forward_model(theta, pos, s)
 %
-% theta [2 x 1] vector (bottom reflection factors)
-% pos [N x 3] matrix (x, y, z) 
-% s structure
+% theta [2 x 1] vector (bottom reflection factors) 
+% pos [N x 3] matrix (x, y, z)                     
+% s structure                                      
 
 filename=sprintf('%07d', randi([0,9999999])); %'temporary';
 %b filename = 'ac_env_model';
 
 % Create envioreemnt file using the current parameters
 writeENV3D([filename '.env'], s, theta);
+writeBTY3D([filename '.bty'], s.scene, theta(1), theta(2));
 
 % Copy bty and ssp file
 copyfile("ac_env_model.ssp", [filename '.ssp'])
-copyfile("ac_env_model.bty", [filename '.bty'])
 
 pause(0.05)
 

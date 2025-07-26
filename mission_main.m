@@ -1,7 +1,7 @@
 clc
 
 global extra_output
-extra_output = true;
+extra_output = false;
 
 global units
 units = 'km';
@@ -16,6 +16,8 @@ data.th = s.mu_th+chol(s.Sigma_th,'lower')*randn(size(s.mu_th));
 
 % Create chosen scenario for the simulation
 [scene, sceneFigure] = scenarioBuilder(s);
+
+s.scene = scene;
 
 % Generate a .ssp file if needed
 if s.sim_use_ssp_file
