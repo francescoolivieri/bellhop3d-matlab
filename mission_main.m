@@ -38,6 +38,11 @@ draw_true_env(s, scene);
 % figure;
 % plotshdpol( s.bellhop_file_name + ".shd",  0, 0, 10 )
 %%
+% display(forward_model(data.th, [0 1.5 20], s));
+% display(forward_model(data.th + 0.01, [0 1.5 20], s));
+% display(forward_model(data.th + [5 ; 0], [0 1.5 20], s));
+% display(forward_model(data.th + [0.0 ; 0.3], [0 1.5 20], s));
+
 
 % Initialize filter 
 data = init_filter(data,s);

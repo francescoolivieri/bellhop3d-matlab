@@ -43,7 +43,7 @@ else
     fprintf(fid, '''A'' 0.0 \n');
 end
 
-fprintf(fid, ' %.2f   %.6f 0.5 %.6f /\n', s.sim_max_depth, theta(1) , theta(2));   %fprintf(fid, ' %.2f   %.2f 0.0 1.5 0.5 /\n', s.sim_max_depth, s.bottom_ssp);
+fprintf(fid, ' %.2f   %f 0 %f 0.5 0 /\n', s.sim_max_depth, theta(1) , theta(2));   %fprintf(fid, ' %.2f   %.2f 0.0 1.5 0.5 /\n', s.sim_max_depth, s.bottom_ssp);
 fprintf(fid, '1                 ! NSx number of source coordinates in x\n');
 fprintf(fid, '0.0 /             ! x coordinate of source (km)\n');
 fprintf(fid, '1                 ! NSy number of source coordinates in y\n');

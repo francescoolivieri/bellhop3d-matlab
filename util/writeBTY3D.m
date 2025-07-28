@@ -73,8 +73,11 @@ try
         fprintf( fid, '\n');
     end
     fprintf( fid, '1 \n');
-    fprintf(fid, ' %.6f 0.5 %.6f /\n', bottom_ssp, bottom_density); %fprintf( fid, '%.2f 0 1.5 0.5 0 \n', bottom_ssp);
+    % fprintf(fid, ' %.6f 0.5 %.6f /\n', bottom_ssp, bottom_density); %fprintf( fid, '%.2f 0 1.5 0.5 0 \n', bottom_ssp);
     
+    fprintf( fid, '%f 0 %f 0.5 0 \n', bottom_ssp, bottom_density);
+
+
     fclose( fid );
 
     % fprintf('Wrote BTY file. \n');

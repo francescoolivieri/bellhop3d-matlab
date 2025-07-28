@@ -13,7 +13,7 @@ function [mu_y, Sigma_yy, Sigma_xy] = unscented_transform(f, mu_x, Sigma_xx)
     L = length(mu_x);
     
     % Scaling parameters
-    alpha = 1e-1;   % Small positive value to control the spread of sigma points
+    alpha = 1e-3;   % Small positive value to control the spread of sigma points
     kappa = 0;      % Secondary scaling parameter
     beta = 2;       % Optimal for Gaussian distributions
     

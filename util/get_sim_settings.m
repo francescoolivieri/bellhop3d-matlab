@@ -3,7 +3,7 @@ function s = get_sim_settings()
 %simulation
 
 %% Ocean Settings
-s.OceanDepth = 30; % Depth of the ocean in meters
+s.OceanDepth = 40.; % Depth of the ocean in meters
 s.OceanFloorType = 'flat'; % types: flat, smooth_waves, gaussian_features, fractal_noise
 
 s.Ocean_x_min = -2;
