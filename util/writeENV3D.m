@@ -31,9 +31,8 @@ else
     fprintf(fid, '   0.0  1535.52  /\n');
     fprintf(fid, '   10.0  1530.29  /\n');
     fprintf(fid, '   20.0  1526.69  /\n');
-    fprintf(fid, '   30.0  1517.78  /\n');
-    fprintf(fid, '   40.0  1520.49  /\n');
-    fprintf(fid, '   %.2f  1550.30  /\n', s.sim_max_depth);
+    fprintf(fid, '   40.0  1530.69  /\n');
+    fprintf(fid, '   %.2f  1600.30  /\n', s.sim_max_depth);
 
 end
     
@@ -54,12 +53,12 @@ fprintf(fid, '200               ! NRz\n');
 fprintf(fid, '0 %.2f /          ! Rz(1 : NRz) (m)\n', s.sim_max_depth);
 fprintf(fid, '1000              ! NRr\n');
 fprintf(fid, '0.0  1.5 /      ! Rr(1 : NRr ) (km)\n');
-fprintf(fid, '4                 ! Ntheta (number of bearings)\n');
+fprintf(fid, '5                 ! Ntheta (number of bearings)\n');
 fprintf(fid, '0.0 360.0 /         ! bearing angles (degrees)\n');
 fprintf(fid, '''CG   2''          ! ''R/C/I/S''\n');
 fprintf(fid, '1001              ! Nalpha\n');
 fprintf(fid, '-89 89 /    ! alpha1, 2 (degrees) Elevation/declination angle fan\n');
-fprintf(fid, '21            ! Nbeta\n');
+fprintf(fid, '10            ! Nbeta\n');
 fprintf(fid, '0  360 /           ! beta1, beta2 (degrees) bearine angle fan\n');
 fprintf(fid, '0.0  1.55 1.55 %.2f ! STEP (m), Box%%x (km) Box%%y (km) Box%%z (m)\n', s.sim_max_depth+.5); % Use %% for literal %
 

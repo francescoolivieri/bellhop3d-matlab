@@ -55,9 +55,9 @@ s.d_z=5;                            % Step distance depth [m]
 s.d_x=0.05;                           % Step distance range [m]
 s.d_y=0.05;                           % Step distance range [m]
 
-s.z_start=0.030;                       % Start depth [m]
-s.x_start=0.050;                       % Start x [m]
-s.y_start=0.050;                       % Start y [m]
+s.z_start=20;                       % Start depth [m]
+s.x_start=0.500;                       % Start x [km]
+s.y_start=0.500;                       % Start y [km]
 
 s.depth=1;                          % Depth of planing tree, i.e., how many steps ahead should we plan. 
 

@@ -13,7 +13,7 @@ function [mu_y, Sigma_yy, Sigma_xy] = unscented_transform(f, mu_x, Sigma_xx)
     L = length(mu_x);
     
     % Scaling parameters
-    alpha = 1e-3;   % Small positive value to control the spread of sigma points
+    alpha = .001;   % Small positive value to control the spread of sigma points
     kappa = 0;      % Secondary scaling parameter
     beta = 2;       % Optimal for Gaussian distributions
     
@@ -24,8 +24,9 @@ function [mu_y, Sigma_yy, Sigma_xy] = unscented_transform(f, mu_x, Sigma_xx)
     [U, S, V] = svd(Sigma_xx);  % Use SVD for stability
     sqrt_Sigma_xx = U * sqrt(S) * V';
 
-    %sqrt_Sigma_xx = chol(Sigma_xx, 'lower');
-    
+
+    % sqrt_Sigma_xx = chol(Sigma_xx, 'lower');
+   
 
     sigma_points = zeros(L, 2 * L + 1);
     sigma_points(:,1) = mu_x;  % First sigma point (mean)
@@ -35,7 +36,6 @@ function [mu_y, Sigma_yy, Sigma_xy] = unscented_transform(f, mu_x, Sigma_xx)
         sigma_points(:,i+L+1) = mu_x - gamma * sqrt_Sigma_xx(:,i);
     end
 
-     
     % Weights
     W_m = [lambda / (L + lambda), repmat(1 / (2 * (L + lambda)), 1, 2 * L)];
     W_c = W_m;

@@ -32,74 +32,32 @@ end
 % Create 3D grid for uncertainty visualization
 x_values = s.x_min:0.3:s.x_max;
 y_values = s.y_min:0.3:s.y_max;
-z_values = s.z_min:10:s.z_max;
+z_values = s.z_min+5:5:s.OceanDepth-5;
 
-% % OPTION 1: Compute only 2D slice (EFFICIENT - recommended)
+% % OPTION 1: Compute only 2D slice (+ EFFICIENT)
 % % Create a 2D slice at a specific y-value
-% y_slice = mean([s.y_min, s.y_max]); % Middle y-value
-% 
-% % Generate 2D grid at the y_slice
-% [X_slice, Z_slice] = meshgrid(x_values, z_values);
-% pos_slice = [X_slice(:), repmat(y_slice, numel(X_slice), 1), Z_slice(:)];
-% 
-% % Calculate prediction uncertainty for 2D slice only
-% Np = 40;
-% Y_slice = zeros(size(pos_slice, 1), Np);
-% 
-% parfor pp = 1:Np
-%     th = data.th_est(:, idx) + chol(squeeze(data.Sigma_est(:, :, idx)), 'lower') * randn(size(data.th_est(:, idx)));
-%     Y_slice(:, pp) = forward_model(th, pos_slice, s);
-% end
-% var_tl_slice = var(Y_slice, [], 2);
-% 
-% % Reshape for 2D plotting
-% var_tl_2d = reshape(var_tl_slice, size(X_slice));
-% 
-% % Create the pcolor plot (uncertainty plot, 2D slice)
-% figure(5);
-% pcolor(X_slice, Z_slice, sqrt(var_tl_2d));
-% shading interp;
-% cb = colorbar;
-% set(gca, 'YDir', 'Reverse')
-% ylabel('Depth (m)')
-% xlabel('X coordinate (m)')
-% title(sprintf('Standard deviation of predicted loss (Y-slice at %.1f m)', y_slice));
-% colormap jet;
-% caxis([0 10])
-% cb.Label.String = 'Std (dB)';
+y_slice = mean([s.y_min, s.y_max]); % Middle y-value
 
-% OPTION 2: If you want to keep full 3D computation and extract slices
-% Uncomment this section and comment out Option 1 above
+% Generate 2D grid at the y_slice
+[X_slice, Z_slice] = meshgrid(x_values, z_values);
+pos_slice = [X_slice(:), repmat(y_slice, numel(X_slice), 1), Z_slice(:)];
 
-% Full 3D grid (warning: computationally expensive)
-[X, Y, Z] = meshgrid(x_values, y_values, z_values);
-pos = [X(:), Y(:), Z(:)];
-
-% Calculate prediction uncertainty for full 3D
-Np = 20;
-Y = zeros(size(pos, 1), Np);
+% Calculate prediction uncertainty for 2D slice only
+Np = 40;
+Y_slice = zeros(size(pos_slice, 1), Np);
 
 parfor pp = 1:Np
     th = data.th_est(:, idx) + chol(squeeze(data.Sigma_est(:, :, idx)), 'lower') * randn(size(data.th_est(:, idx)));
-    Y(:, pp) = forward_model(th, pos, s);
+    Y_slice(:, pp) = forward_model(th, pos_slice, s);
 end
-var_tl = var(Y, [], 2);
+var_tl_slice = var(Y_slice, [], 2);
 
-% Reshape var_tl into 3D grid
-var_tl_3d = reshape(var_tl, size(X));
+% Reshape for 2D plotting
+var_tl_2d = reshape(var_tl_slice, size(X_slice));
 
-% Extract 2D slice from 3D results for visualization
-y_slice = mean([s.y_min, s.y_max]);
-[~, y_idx] = min(abs(y_values - y_slice)); % Find closest y index
-
-% Extract slice at the chosen y-index
-X_slice_from_3d = squeeze(X(:, y_idx, :));
-Z_slice_from_3d = squeeze(Z(:, y_idx, :));
-var_tl_slice_from_3d = squeeze(var_tl_3d(:, y_idx, :));
-
-% Plot the extracted slice
+% Create the pcolor plot (uncertainty plot, 2D slice)
 figure(5);
-pcolor(X_slice_from_3d, Z_slice_from_3d, sqrt(var_tl_slice_from_3d));
+pcolor(X_slice, Z_slice, sqrt(var_tl_2d));
 shading interp;
 cb = colorbar;
 set(gca, 'YDir', 'Reverse')
@@ -110,39 +68,89 @@ colormap jet;
 caxis([0 10])
 cb.Label.String = 'Std (dB)';
 
-% Additional 3D visualization options
-figure(6);
 
-% % Plot 3D isosurface of uncertainty
-% isosurface(X, Y, Z, sqrt(var_tl_3d), 2); % 2 dB uncertainty level
+% % OPTION 2: Full 3D computation and extract slices
+% Uncomment this section and comment out Option 1 above
+% Full 3D grid (warning: computationally expensive)
+% [X, Y, Z] = meshgrid(x_values, y_values, z_values);
+% pos_all = [X(:), Y(:), Z(:)];
+% 
+% % Check positions are within the boundaries
+% mask = sqrt(pos_all(:,1).^2 + pos_all(:,2).^2) <= s.x_max;
+% pos_valid = pos_all(mask, :);
+% 
+% % Calculate prediction uncertainty for valid positions only
+% Np = 10;
+% Yp = zeros(size(pos_valid, 1), Np);
+% 
+% parfor pp = 1:Np
+%     th = data.th_est(:, idx) + chol(squeeze(data.Sigma_est(:, :, idx)), 'lower') * randn(size(data.th_est(:, idx)));
+%     Yp(:, pp) = forward_model(th, pos_valid, s);
+% end
+% var_tl_valid = var(Yp, [], 2);
+% 
+% % Create full-size array with NaN for invalid positions
+% var_tl_full = NaN(size(pos_all, 1), 1);
+% var_tl_full(mask) = var_tl_valid;  % Place valid values at correct positions
+% 
+% % Reshape var_tl into 3D grid
+% var_tl_3d = reshape(var_tl_full, size(X));
+% 
+% % Extract 2D slice from 3D results for visualization
+% y_slice = mean([s.y_min, s.y_max]);
+% [~, y_idx] = min(abs(y_values - y_slice)); % Find closest y index
+% 
+% % Extract slice at the chosen y-index
+% X_slice_from_3d = squeeze(X(:, y_idx, :));
+% Z_slice_from_3d = squeeze(Z(:, y_idx, :));
+% var_tl_slice_from_3d = squeeze(var_tl_3d(:, y_idx, :));
+% 
+% % Plot the extracted slice
+% figure(5);
+% pcolor(X_slice_from_3d, Z_slice_from_3d, sqrt(var_tl_slice_from_3d));
+% shading interp;
+% cb = colorbar;
+% set(gca, 'YDir', 'Reverse')
+% ylabel('Depth (m)')
 % xlabel('X coordinate (m)')
-% ylabel('Y coordinate (m)')
-% zlabel('Depth (m)')
-% title('3D Uncertainty Isosurface (2 dB level)')
-% set(gca, 'ZDir', 'Reverse')
-% view(45, 30)
-% grid on
-
-% Plot multiple Y-slices
-figure(7);
-num_slices = 5;
-y_slice_indices = round(linspace(1, length(y_values), num_slices));
-for i = 1:num_slices
-    subplot(1, num_slices, i);
-    slice_data = squeeze(sqrt(var_tl_3d(:, y_slice_indices(i), :)));
-    X_plot = squeeze(X(:, y_slice_indices(i), :));
-    Z_plot = squeeze(Z(:, y_slice_indices(i), :));
-    pcolor(X_plot, Z_plot, slice_data);
-    shading interp;
-    set(gca, 'YDir', 'Reverse')
-    title(sprintf('Y = %.1f m', y_values(y_slice_indices(i))));
-    xlabel('X (m)');
-    if i == 1
-        ylabel('Depth (m)');
-    end
-    colorbar;
-    caxis([0 10]);
-end
+% title(sprintf('Standard deviation of predicted loss (Y-slice at %.1f m)', y_slice));
+% colormap jet;
+% caxis([0 10])
+% cb.Label.String = 'Std (dB)';
+% 
+% % Additional 3D visualization options
+% % figure(6);
+% 
+% % % Plot 3D isosurface of uncertainty
+% % isosurface(X, Y, Z, sqrt(var_tl_3d), 2); % 2 dB uncertainty level
+% % xlabel('X coordinate (m)')
+% % ylabel('Y coordinate (m)')
+% % zlabel('Depth (m)')
+% % title('3D Uncertainty Isosurface (2 dB level)')
+% % set(gca, 'ZDir', 'Reverse')
+% % view(45, 30)
+% % grid on
+% 
+% % Plot multiple Y-slices
+% figure(7);
+% num_slices = 5;
+% y_slice_indices = round(linspace(1, length(y_values), num_slices));
+% for i = 1:num_slices
+%     subplot(1, num_slices, i);
+%     slice_data = squeeze(sqrt(var_tl_3d(:, y_slice_indices(i), :)));
+%     X_plot = squeeze(X(:, y_slice_indices(i), :));
+%     Z_plot = squeeze(Z(:, y_slice_indices(i), :));
+%     pcolor(X_plot, Z_plot, slice_data);
+%     shading interp;
+%     set(gca, 'YDir', 'Reverse')
+%     title(sprintf('Y = %.1f m', y_values(y_slice_indices(i))));
+%     xlabel('X (m)');
+%     if i == 1
+%         ylabel('Depth (m)');
+%     end
+%     colorbar;
+%     caxis([0 10]);
+% end
 
 
 % Plot measurement trajectory in 3D

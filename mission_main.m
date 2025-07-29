@@ -29,20 +29,22 @@ writeENV3D(s.bellhop_file_name + ".env", s, data.th);
 fprintf('Wrote ENV file.\n');
 
 % Generate .bty file 
-writeBTY3D(s.bellhop_file_name + ".bty", scene, data.th(1), data.th(2));
+if s.sim_use_ssp_file
+    writeBTY3D(s.bellhop_file_name + ".bty", scene, data.th(1), data.th(2));
+end
 
 % Run bellhop and draw environment
 draw_true_env(s, scene);
 
 %% Testing shd plot functions (not working)
 % figure;
-% plotshdpol( s.bellhop_file_name + ".shd",  0, 0, 10 )
+% plotshdpol( s.bellhop_file_name + ".shd")
 %%
-% display(forward_model(data.th, [0 1.5 20], s));
-% display(forward_model(data.th + 0.01, [0 1.5 20], s));
-% display(forward_model(data.th + [5 ; 0], [0 1.5 20], s));
-% display(forward_model(data.th + [0.0 ; 0.3], [0 1.5 20], s));
-
+% Test parameter sensitivity (uncomment these lines)
+% fprintf('Testing parameter sensitivity:\n');
+% fprintf('Base: %.6f\n', forward_model(data.th, [-1.1 -1.1 5], s));
+% fprintf('+5 m/s: %.6f\n', forward_model(data.th + [5; 0], [2000 2000.0 20], s));
+% fprintf('+0.3 density: %.6f\n', forward_model(data.th + [0; 0.3], [2000 2000.0 20], s));
 
 % Initialize filter 
 data = init_filter(data,s);
