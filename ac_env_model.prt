@@ -79,9 +79,10 @@
 
  __________________________________________________________________________
 
-    Number of Receiver bearings, theta =            3
+    Number of Receiver bearings, theta =            6
     Receiver bearings, theta (degrees)
-                -90.0000       0.00000       90.0000    
+                 0.00000       72.0000       144.000       216.000    
+   288.000       360.000    
 
 
  Coherent TL calculation
@@ -100,9 +101,9 @@
 
  Replacing beam take-off angles, beta, with receiver bearing lines, theta
 
-    Number of beams in bearing   =            3
+    Number of beams in bearing   =            5
     Beam take-off angles (degrees)
-  -90.0000       0.00000       90.0000    
+   0.00000       72.0000       144.000       216.000       288.000    
 
  __________________________________________________________________________
 
@@ -197,8 +198,10 @@ Province  alphaR      betaR     rho        alphaI     betaI
  epsilonOPT2 =                (0.0000000000000000,0.0000000000000000)
  EpsMult     =    1.0000000000000000     
 
-Tracing azimuthal beam    1    -90.00
-Tracing azimuthal beam    2      0.00
-Tracing azimuthal beam    3     90.00
+Tracing azimuthal beam    1      0.00
+Tracing azimuthal beam    2     72.00
+Tracing azimuthal beam    3    144.00
+Tracing azimuthal beam    4    216.00
+Tracing azimuthal beam    5    288.00
 
- CPU Time =        1.19    s
+ CPU Time =        1.82    s

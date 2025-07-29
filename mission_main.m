@@ -18,7 +18,11 @@ end
 %writeENV3D(s);
 
 % Generate .bty file 
-writeBTY3D(s.bellhop_file_name + ".bty", scene, s);
+%writeBTY3D(s.bellhop_file_name + ".bty", scene, s);
+
+figure
+title('BTY plot','FontSize',10);
+plotbdry3d([s.bellhop_file_name '.bty'])
 
 % Run bellhop and draw environment
 data = draw_true_env(s, scene);
@@ -28,6 +32,8 @@ data = draw_true_env(s, scene);
 % plotshdpol( s.bellhop_file_name + ".shd",  0, 0, 10 )
 
 %%
+
+disp(forward_model(data.th, [-1000 500 20]));
 
 % Initialize filter 
 data = init_filter(data,s);

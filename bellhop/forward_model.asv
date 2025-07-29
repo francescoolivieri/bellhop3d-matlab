@@ -1,24 +1,33 @@
-function tl = forward_model(theta,pos)
+function tl = forward_model(theta, pos, s)
 %
-% theta [2 x 1] vector (bottom reflection factors)
-% pos [N x 2 ] matrix (range depth)  
+% theta [2 x 1] vector (bottom reflection factors) 
+% pos [N x 3] matrix (x, y, z)                     
+% s structure                                      
 
-% filename=sprintf('%07d', randi([0,9999999])); %'temporary';
-filename = 'ac_env_model';
+filename=sprintf('%07d', randi([0,9999999])); %'temporary';
+%b filename = 'ac_env_model';
 
-% % Create envioreemnt file using the current parameters
-% create_env_file(theta,[filename '.env']);
+% Create envioreemnt file using the current parameters
+writeENV3D([filename '.env'], s, theta);
+
+% Copy bty and ssp file
+if s.sim_use_bty_file
+    writeBTY3D([filename '.bty'], s.scene, theta(1), theta(2));
+end
+
+if s.sim_use_ssp_file
+    copyfile("ac_env_model.ssp", [filename '.ssp'])
+end
 
 pause(0.05)
 
 %delete('temporary.shd')
 
 % Run Bellhop
-% bellhop3d(filename);
+bellhop3d(filename);
 
 % Read data
 [~, ~, ~, ~, ~, Pos, pressure ] = read_shd([filename '.shd']);
-
 
 
 % Get number of bearing angles
@@ -54,15 +63,9 @@ for i = 1:size(pos, 1)
     my_range = sqrt(pos(i, 1)^2 + pos(i, 2)^2);
     my_depth = pos(i, 3);
     
-    fprintf("BERAINGAS: %d", bearing_idx);
-
     % Interpolate using the appropriate bearing slice
     tl_temp = interp2(rGrid, zGrid, double(abs(squeeze(pressure(bearing_idx, 1, :, :)))), my_range, my_depth, "linear");
     
-    if isnan(tl_temp)
-        disp(pos(i, :))
-    end
-
     % Store result
     tl(i) = tl_temp;
 end
@@ -73,11 +76,12 @@ tl(tl < 1e-37) = 1e-37;          % remove zeros
 tl = -20.0 * log10(tl);          % so there's no error when we take the log
 
 
-display(tl);
-
-% delete([filename '.prt'])
-% delete([filename '.env'])
-% delete([filename '.shd'])
+delete([filename '.prt'])
+delete([filename '.env'])
+delete([filename '.shd'])
+delete([filename '.ssp'])
+delete([filename '.bty'])
+pause(0.05)
 
 end
 
