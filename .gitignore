@@ -1,4 +1,7 @@
 # Bellhop Generated Files
+*.env
+*.bty
+*.ssp
 *.ray
 *.shd
 *.prt
