@@ -1,4 +1,5 @@
 clc
+clf
 
 global extra_output
 extra_output = false;
@@ -11,7 +12,8 @@ clean_files();
 % Load the simulation settings
 s = get_sim_settings();
 
-% Draw random parameter according to prior distribution
+
+% Set random parameter according to prior distribution
 data.th = s.mu_th+chol(s.Sigma_th,'lower')*randn(size(s.mu_th));
 
 % Create chosen scenario for the simulation
@@ -36,15 +38,10 @@ end
 % Run bellhop and draw environment
 draw_true_env(s, scene);
 
-%% Testing shd plot functions (not working)
+%% Testing shd plot functions (working)
 % figure;
 % plotshdpol( s.bellhop_file_name + ".shd")
 %%
-% Test parameter sensitivity (uncomment these lines)
-% fprintf('Testing parameter sensitivity:\n');
-% fprintf('Base: %.6f\n', forward_model(data.th, [-1.1 -1.1 5], s));
-% fprintf('+5 m/s: %.6f\n', forward_model(data.th + [5; 0], [2000 2000.0 20], s));
-% fprintf('+0.3 density: %.6f\n', forward_model(data.th + [0; 0.3], [2000 2000.0 20], s));
 
 % Initialize filter 
 data = init_filter(data,s);
@@ -58,7 +55,10 @@ for n=2:s.N
     fprintf('Iteration nr %d \n', n)
 
     % Get action
-    data = pos_next_measurement(data, s);
+    %data = pos_next_measurement(data, s);
+
+    s.nbv_method = 'information_gain';
+    data = pos_next_measurement_sota(data, s);
 
     % Take measurement
     data = generate_data(data, s);
