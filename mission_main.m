@@ -46,19 +46,15 @@ draw_true_env(s, scene);
 % Initialize filter 
 data = init_filter(data,s);
 
-% Initial Waypoints
-%InitialWaypoints = [s.InitialPosition; data.x(1) data.y(1) -7];
-
 for n=2:s.N
         
     % Print state
     fprintf('Iteration nr %d \n', n)
 
     % Get action
-    %data = pos_next_measurement(data, s);
-
-    s.nbv_method = 'information_gain';
-    data = pos_next_measurement_sota(data, s);
+    tic
+    data = pos_next_measurement(data, s);
+    toc
 
     % Take measurement
     data = generate_data(data, s);

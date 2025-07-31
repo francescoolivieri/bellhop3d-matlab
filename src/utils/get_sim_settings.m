@@ -29,6 +29,7 @@ s.sim_bty_splitted = false;
 
 
 
+
 %% External File References
 s.env_file_name = "ac_env_model.env";
 s.bellhop_file_name = 'ac_env_model';
@@ -49,7 +50,8 @@ s.y_max=1.5;
 
 % Sensor management
 s.sm=true;                          % Sensor management on/off
-s.bayesian_opt=false;               % Use Bayesian optimization   
+s.nbv_method='rrt_star';    % methods: tree_memoized, rrt_star, bayesian_opt, information_gain, uncertainty_guided, multi_objective
+
 
 %% Measurements position settings
 s.d_z=5;                            % Step distance depth [m]

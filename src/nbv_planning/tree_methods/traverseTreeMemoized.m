@@ -4,10 +4,10 @@ function tree = traverseTreeMemoized(tree, mu_parent, Sigma_parent, x_parent, y_
     end
 
     if isfield(tree, 'branch')
-        % Non-leaf node: iterate through child branches
+        % Non-leaf node: iterate through child branches (27 possible actions)
         for k = 1:numel(tree.branch)
             
-            % Update position using parent's, and current action k
+            % Update position using parent's, and current action k (with 27-action model)
             [x_updated, y_updated, z_updated] = update_pos(x_parent, y_parent, z_parent, s, k);
 
             % Create cache key for this position

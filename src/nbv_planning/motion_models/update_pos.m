@@ -1,4 +1,4 @@
-function [x_child, y_child, z_child] = update_pos(x_parent, y_parent, z_parent,s, action)
+function [x_child, y_child, z_child] = update_pos(x_parent, y_parent, z_parent, s, action)
     % Enhanced motion model with 27 possible actions (3x3x3 grid)
     % Original 9 actions only considered movement in XY plane for each Z level
     % This considers all combinations of {-1, 0, 1} for each axis
@@ -32,6 +32,4 @@ function [x_child, y_child, z_child] = update_pos(x_parent, y_parent, z_parent,s
         y_child = nan;
         z_child = nan;
     end
-
-end
-
+end 

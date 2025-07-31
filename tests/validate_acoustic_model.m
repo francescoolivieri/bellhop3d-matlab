@@ -10,6 +10,9 @@ function validate_acoustic_model()
     fprintf('🔊 Acoustic Forward Model Validation\n');
     fprintf('====================================\n\n');
     
+    global units 
+    units = 'km';
+
     % Load settings
     s = get_sim_settings();
     
