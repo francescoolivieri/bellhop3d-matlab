@@ -39,7 +39,7 @@ switch lower(s.OceanFloorType)
         
         features = [
              [0.5, 0.5, -5, 0.5]; % Central seamount (negative = hill)
-             [0, 0.5, 5, 0.5]; % Smaller seamount
+             [0, 1, -45, 0.5]; % Smaller seamount
              [0, -0.5, -5, 0.5]; % Smaller seamount
              [0, 0.5, 5, 0.5]; % Smaller seamount
         ];

@@ -2,8 +2,8 @@ function data = rrt_star_based_nbv(data, s, idx)
     % RRT* based NBV planning with path optimization
     
     % Initialize RRT* parameters
-    if ~isfield(s, 'rrt_max_iter'), s.rrt_max_iter = 20; end
-    if ~isfield(s, 'rrt_step_size'), s.rrt_step_size = 1.5; end
+    if ~isfield(s, 'rrt_max_iter'), s.rrt_max_iter = 10; end
+    if ~isfield(s, 'rrt_step_size'), s.rrt_step_size = 1; end
     if ~isfield(s, 'rrt_goal_bias'), s.rrt_goal_bias = 0.05; end
     if ~isfield(s, 'rrt_search_radius'), s.rrt_search_radius = 8.0; end
     
@@ -19,7 +19,7 @@ function data = rrt_star_based_nbv(data, s, idx)
     
     for i = 1:length(rrt_star_tree.nodes)
         node = rrt_star_tree.nodes(i);
-        pos = node.position;
+        pos = node.position;    
         
         if is_valid_position(pos, s)
             info_gain = calculate_information_gain(pos, data.th_est(:, idx), data.Sigma_est(:, :, idx), s);
@@ -64,6 +64,7 @@ function rrt_tree = build_rrt_star_exploration_tree(start_pos, s)
         
         % Extend toward random point
         new_pos = extend_toward_point(nearest_node.position, rand_point, s.rrt_step_size, s);
+
         
         if is_valid_position(new_pos, s)
             % Find nodes within search radius
@@ -110,6 +111,9 @@ function rrt_tree = build_rrt_star_exploration_tree(start_pos, s)
                     end
                 end
             end
+        else
+            fprintf("New pos: %f %f %f", new_pos);
+            disp("INVALID");
         end
     end
 end
@@ -121,8 +125,6 @@ function pos = sample_random_position(s)
         s.y_min + rand * (s.y_max - s.y_min);
         s.z_min + rand * (s.OceanDepth - s.z_min)
     ]';
-
-    disp(pos)
 end
 
 function pos = sample_biased_position(s)
@@ -189,6 +191,17 @@ function new_pos = extend_toward_point(from_pos, to_pos, step_size, s)
     new_pos(1) = max(s.x_min, min(s.x_max, new_pos(1)));
     new_pos(2) = max(s.y_min, min(s.y_max, new_pos(2)));
     new_pos(3) = max(s.z_min, min(s.z_max, new_pos(3)));
+    
+    if sqrt(new_pos(1)^2 + new_pos(2)^2) > s.x_max 
+        v = [new_pos(1)-s.sim_sender_x, new_pos(2)-s.sim_sender_y];
+        v_unit = v / norm(v);
+        q = [s.sim_sender_x, s.sim_sender_y] + s.sim_range * v_unit;
+
+        new_pos(1) = q(1);
+        new_pos(2) = q(2);
+
+        fprintf('Closest point on the circle: (%.2f, %.2f)\n', new_pos(1), new_pos(2));
+    end
 end
 
 

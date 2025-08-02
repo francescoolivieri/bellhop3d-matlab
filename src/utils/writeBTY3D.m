@@ -1,4 +1,4 @@
-function writeBTY3D(name_btyfil, scene, bottom_ssp, bottom_density)
+function writeBTY3D(name_btyfil, scene, map)
 %createbtyfil_3D Creates a bathymetry file from a scene structure.
 %   This function extracts grid and depth data from a 'scene' struct
 %   and writes it to a bathymetry file using 'writebdry3d'.
@@ -66,21 +66,42 @@ try
         end
     end
     
+    num_sediment_types = size(map('sound_speed_sediment'), 2);
+    sediment_type_counter = 1;
     for iy = 1 : ny
         for ix = 1 : nx
-            fprintf( fid, '1 ');
+
+            if num_sediment_types > 1 
+
+                if rem(ix, round(nx/num_sediment_types)) ~= 0
+                    fprintf( fid, '%d ', sediment_type_counter);
+                else
+                    fprintf( fid, '%d ', sediment_type_counter);
+                    sediment_type_counter = sediment_type_counter + 1;
+                end 
+
+            else
+                fprintf( fid, '1 ');
+            end
+
         end
+        sediment_type_counter = 1;
         fprintf( fid, '\n');
     end
-    fprintf( fid, '1 \n');
-    % fprintf(fid, ' %.6f 0.5 %.6f /\n', bottom_ssp, bottom_density); %fprintf( fid, '%.2f 0 1.5 0.5 0 \n', bottom_ssp);
-    
-    fprintf( fid, '%f 0 %f 0.5 0 \n', bottom_ssp, bottom_density);
 
+    fprintf( fid, '%d \n', num_sediment_types);
+    for i = 1:num_sediment_types
+
+        % Temporary solution
+        arr = map('sound_speed_sediment');
+        fprintf( fid, '%f 0 %f %f 0 \n',  arr(i), map('density_sediment'), map('attenuation_sediment'));
+
+    end
+
+   
 
     fclose( fid );
 
-    % fprintf('Wrote BTY file. \n');
 catch ME
     error('Failed to write bathymetry file. Error: %s', ME.message);
 end

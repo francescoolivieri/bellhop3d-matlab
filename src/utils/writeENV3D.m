@@ -1,4 +1,4 @@
-function writeENV3D(filename, s, theta)
+function writeENV3D(filename, s, map)
 %WRITEENV3D Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -42,7 +42,11 @@ else
     fprintf(fid, '''A'' 0.0 \n');
 end
 
-fprintf(fid, ' %.2f   %f 0 %f 0.5 0 /\n', s.sim_max_depth, theta(1) , theta(2));   %fprintf(fid, ' %.2f   %.2f 0.0 1.5 0.5 /\n', s.sim_max_depth, s.bottom_ssp);
+ss_sediment = map('sound_speed_sediment');
+rho_sediment = map('density_sediment');
+att_sediment = map('attenuation_sediment');
+
+fprintf(fid, ' %.2f   %f 0 %f %f 0 /\n', s.sim_max_depth, ss_sediment(1) , rho_sediment(1), att_sediment(1));   %fprintf(fid, ' %.2f   %.2f 0.0 1.5 0.5 /\n', s.sim_max_depth, s.bottom_ssp);
 fprintf(fid, '1                 ! NSx number of source coordinates in x\n');
 fprintf(fid, '0.0 /             ! x coordinate of source (km)\n');
 fprintf(fid, '1                 ! NSy number of source coordinates in y\n');

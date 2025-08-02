@@ -12,22 +12,18 @@ function data = pos_next_measurement(data, s)
             case 'tree_memoized'
                 % Optimized tree-based approach with memoization
                 data = tree_memoized_nbv(data, s, idx);
+
+            case 'rrt_star'
+                % RRT* based NBV planning
+                data = rrt_star_based_nbv(data, s, idx);
                 
             case 'information_gain' % NOT TESTED
                 % Information gain-based approach 
                 data = information_gain_nbv(data, s, idx);
-                
-            case 'uncertainty_guided' % NOT TESTED
-                % Uncertainty-guided approach inspired by NeU-NBV
-                data = uncertainty_guided_nbv(data, s, idx);
-                
+
             case 'multi_objective' % NOT TESTED
                 % Multi-objective optimization approach
                 data = multi_objective_nbv(data, s, idx);
-                
-            case 'rrt_star'
-                % RRT* based NBV planning
-                data = rrt_star_based_nbv(data, s, idx);
                 
             case 'bayesian_opt'
                 % Bayesian optimization approach
@@ -39,6 +35,7 @@ function data = pos_next_measurement(data, s)
         end
         
     else
+
         % Move as lawn mower (original behavior)
         data = lawnmower_pattern(data, s, idx);
     end

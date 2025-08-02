@@ -1,4 +1,4 @@
-function [mu_y, Sigma_yy, Sigma_xy] = unscented_transform(f, mu_x, Sigma_xx)
+function [mu_y, Sigma_yy, Sigma_xy] = unscented_transform(f, mu_x, Sigma_xx, s)
     % UNSCENTED_TRANSFORM Computes the Unscented Transform (UT)
     % Inputs:
     %   f         - Function handle for the nonlinear transformation y = f(x)
@@ -42,10 +42,13 @@ function [mu_y, Sigma_yy, Sigma_xy] = unscented_transform(f, mu_x, Sigma_xx)
     W_c(1) = W_c(1) + (1 - alpha^2 + beta);  % Covariance weight adjustment
     
     % Transform sigma points through the function
-    Y = zeros(length(f(mu_x)), 2*L+1);  % Preallocate Y (size depends on output of f)
     
+    Y = zeros(1, 2*L+1);  % Preallocate Y (size SET TO 1, BUT SHOULD depends on output of f)
+
     parfor i = 1:(2*L+1)
-        Y(:,i) = f(sigma_points(:,i));
+  
+        map = createParameterMapFromArray(sigma_points(:,i), s);
+        Y(:,i) = f(map);
     end
     
     % Compute transformed mean

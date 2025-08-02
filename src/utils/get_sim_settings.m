@@ -3,7 +3,7 @@ function s = get_sim_settings()
 %simulation
 
 %% Ocean Settings
-s.OceanDepth = 40.; % Depth of the ocean in meters
+s.OceanDepth = 50.; % Depth of the ocean in meters
 s.OceanFloorType = 'flat'; % types: flat, smooth_waves, gaussian_features, fractal_noise
 
 s.Ocean_x_min = -2;
@@ -12,14 +12,16 @@ s.Ocean_y_min = -2;
 s.Ocean_y_max = 2;
 
 s.Ocean_step = 0.2;
-s.Ocean_z_step = 8.;
+s.Ocean_z_step = s.OceanDepth * 0.25; % Empirical rule: shd plot scattered with smaller steps
 
-s.bottom_ssp = 1550.;
 
 %% Bellhop simulation settings
 s.sim_frequency = 1000.;
 s.sim_max_depth = 80.0;
+s.sim_sender_x = 0.0;
+s.sim_sender_y = 0.0;
 s.sim_sender_depth = 10.0;
+s.sim_range = 1.5;
 
 % Extensions
 s.sim_use_ssp_file = true;
@@ -50,7 +52,7 @@ s.y_max=1.5;
 
 % Sensor management
 s.sm=true;                          % Sensor management on/off
-s.nbv_method='rrt_star';    % methods: tree_memoized, rrt_star, bayesian_opt, information_gain, uncertainty_guided, multi_objective
+s.nbv_method='rrt_star';    % methods: tree_memoized, rrt_star, bayesian_opt, information_gain, multi_objective
 
 
 %% Measurements position settings
@@ -69,8 +71,6 @@ s.N=10;                             % Total number of measurements
 s.sigma_tl_noise=1;                 % Variance of the measurement noise [dB]
 
 
-s.mu_th=[1600 1.5]';                % Mean of prior for theta   
-s.Sigma_th=diag([20 0.1].^2);       % Covariance of prior for theta
 s.Sigma_rr=1^2;                            % Filter assumed measurement noise variance [dB^2]
 
 

@@ -7,7 +7,7 @@ if sqrt(pos(1)^2 + pos(2)^2) > s.x_max
 end
 
 % Calculate parameter covariance after measurement
-[~, Sigma_thth] = step_ukf_filter(nan,@(th)forward_model(th, pos, s),mu_th,Sigma_thth,s.Sigma_rr);
+[~, Sigma_thth] = step_ukf_filter(nan,@(th)forward_model_wrapper(th, pos, s),mu_th,Sigma_thth,s.Sigma_rr);
 
 % Create vectors for z and r
 x_values = s.x_min:0.3:s.x_max;
@@ -26,8 +26,13 @@ Np = 15;
 Y_pred = zeros(size(pos,1),Np);
 
 parfor pp = 1:Np
-    th = mu_th + chol(Sigma_thth,'lower')*randn(size(mu_th));  
-    Y_pred(:, pp) = forward_model(th, pos, s);
+    % Sample parameter values
+    th_sample = mu_th + chol(Sigma_thth,'lower')*randn(size(mu_th));
+    
+    % Create parameter map for this sample using utility function
+    param_map_sample = createParameterMapFromArray(th_sample, s);
+    
+    Y_pred(:, pp) = forward_model(param_map_sample, pos, s);
 end
 var_tl = var(Y_pred, [], 2);
 
@@ -43,4 +48,10 @@ V = mean(var_tl);
 
 %V=sum(diag(Sigma_thth));
 
+end
+
+function tl = forward_model_wrapper(th_array, pos, s)
+    % Wrapper function for backward compatibility with UKF
+    param_map = createParameterMapFromArray(th_array, s);
+    tl = forward_model(param_map, pos, s);
 end

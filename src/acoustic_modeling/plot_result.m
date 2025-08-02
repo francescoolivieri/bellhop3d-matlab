@@ -41,37 +41,44 @@ z_values = s.z_min+5:5:s.OceanDepth-5;
 
 % % OPTION 1: Compute only 2D slice (+ EFFICIENT)
 % % Create a 2D slice at a specific y-value
-y_slice = mean([s.y_min, s.y_max]); % Middle y-value
-
-% Generate 2D grid at the y_slice
-[X_slice, Z_slice] = meshgrid(x_values, z_values);
-pos_slice = [X_slice(:), repmat(y_slice, numel(X_slice), 1), Z_slice(:)];
-
-% Calculate prediction uncertainty for 2D slice only
-Np = 10;
-Y_slice = zeros(size(pos_slice, 1), Np);
-
-parfor pp = 1:Np
-    th = data.th_est(:, idx) + chol(squeeze(data.Sigma_est(:, :, idx)), 'lower') * randn(size(data.th_est(:, idx)));
-    Y_slice(:, pp) = forward_model(th, pos_slice, s);
-end
-var_tl_slice = var(Y_slice, [], 2);
-
-% Reshape for 2D plotting
-var_tl_2d = reshape(var_tl_slice, size(X_slice));
-
-% Create the pcolor plot (uncertainty plot, 2D slice)
-figure(5);
-pcolor(X_slice, Z_slice, sqrt(var_tl_2d));
-shading interp;
-cb = colorbar;
-set(gca, 'YDir', 'Reverse')
-ylabel('Depth (m)')
-xlabel('X coordinate (m)')
-title(sprintf('Standard deviation of predicted loss (Y-slice at %.1f m)', y_slice));
-colormap jet;
-caxis([0 10])
-cb.Label.String = 'Std (dB)';
+% y_slice = mean([s.y_min, s.y_max]); % Middle y-value
+% 
+% % Generate 2D grid at the y_slice
+% [X_slice, Z_slice] = meshgrid(x_values, z_values);
+% pos_slice = [X_slice(:), repmat(y_slice, numel(X_slice), 1), Z_slice(:)];
+% 
+% % Calculate prediction uncertainty for 2D slice only
+% Np = 10;
+% Y_slice = zeros(size(pos_slice, 1), Np);
+% 
+% parfor pp = 1:Np
+%     % Sample parameter values from the posterior distribution
+%     th_sample = data.th_est(:, idx) + chol(squeeze(data.Sigma_est(:, :, idx)), 'lower') * randn(size(data.th_est(:, idx)));
+% 
+%     % Create parameter map for this sample using utility function
+%     param_map_sample = createParameterMapFromArray(th_sample, s, data.estimated_params);
+% 
+%     % Call forward model with parameter map
+%     Y_slice(:, pp) = forward_model(param_map_sample, pos_slice, s);
+% end
+% 
+% var_tl_slice = var(Y_slice, [], 2);
+% 
+% % Reshape for 2D plotting
+% var_tl_2d = reshape(var_tl_slice, size(X_slice));
+% 
+% % Create the pcolor plot (uncertainty plot, 2D slice)
+% figure(5);
+% pcolor(X_slice, Z_slice, sqrt(var_tl_2d));
+% shading interp;
+% cb = colorbar;
+% set(gca, 'YDir', 'Reverse')
+% ylabel('Depth (m)')
+% xlabel('X coordinate (m)')
+% title(sprintf('Standard deviation of predicted loss (Y-slice at %.1f m)', y_slice));
+% colormap jet;
+% caxis([0 10])
+% cb.Label.String = 'Std (dB)';
 
 
 % % OPTION 2: Full 3D computation and extract slices
@@ -89,8 +96,14 @@ cb.Label.String = 'Std (dB)';
 % Yp = zeros(size(pos_valid, 1), Np);
 % 
 % parfor pp = 1:Np
-%     th = data.th_est(:, idx) + chol(squeeze(data.Sigma_est(:, :, idx)), 'lower') * randn(size(data.th_est(:, idx)));
-%     Yp(:, pp) = forward_model(th, pos_valid, s);
+%     % Sample parameter values from the posterior distribution
+%     th_sample = data.th_est(:, idx) + chol(squeeze(data.Sigma_est(:, :, idx)), 'lower') * randn(size(data.th_est(:, idx)));
+%     
+%     % Create parameter map for this sample using utility function
+%     param_map_sample = createParameterMapFromArray(th_sample, s, data.estimated_params);
+%     
+%     % Call forward model with parameter map
+%     Yp(:, pp) = forward_model(param_map_sample, pos_valid, s);
 % end
 % var_tl_valid = var(Yp, [], 2);
 % 

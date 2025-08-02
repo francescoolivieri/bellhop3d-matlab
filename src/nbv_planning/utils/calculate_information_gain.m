@@ -1,7 +1,7 @@
 function info_gain = calculate_information_gain(pos, mu_th, Sigma_thth, s)
     % Calculate information gain using entropy reduction
     try
-        [~, Sigma_new] = step_ukf_filter(nan, @(th)forward_model(th, pos, s), mu_th, Sigma_thth, s.Sigma_rr);
+        [~, Sigma_new] = step_ukf_filter(nan, @(map)forward_model(map, pos, s), mu_th, Sigma_thth, s.Sigma_rr, s);
         info_gain = sum(diag(Sigma_thth)) - sum(diag(Sigma_new));
         
     catch ME
