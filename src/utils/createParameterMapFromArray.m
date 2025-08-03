@@ -11,7 +11,7 @@ function param_map = createParameterMapFromArray(th_array, s, reference_map)
     
     if nargin < 3 || isempty(reference_map)
         % Create default parameter map if no reference provided
-        param_map = getDefaultParameterMap();
+        param_map = getDefaultParameterMap(s);
     else
         % Copy from reference map
         param_map = containers.Map(reference_map.keys, reference_map.values);
@@ -38,8 +38,11 @@ function param_map = createParameterMapFromArray(th_array, s, reference_map)
             params_added(i) = 1;
             
             for j = i+1:length(s.estimation_param_names)
-                param_map(param_name) = [param_map(param_name) th_array(j)];
-                params_added(j) = 1;
+                param_name_iter = s.estimation_param_names{j};      
+                if param_name_iter == param_name 
+                    param_map(param_name) = [param_map(param_name) th_array(j)];
+                    params_added(j) = 1;
+                end
             end
 
         else
@@ -49,19 +52,3 @@ function param_map = createParameterMapFromArray(th_array, s, reference_map)
     end
 end
 
-function param_map = getDefaultParameterMap()
-    % Define all possible parameters and their default values
-    param_map = containers.Map();
-    
-    % Acoustic parameters
-    param_map('sound_speed_water') = 1500;        % m/s
-    param_map('sound_speed_sediment') = 1600;     % m/s
-    param_map('density_sediment') = 1.5;          % g/cm³
-    param_map('attenuation_sediment') = 0.5;      % dB/λ
-    
-    % Geometric parameters
-    param_map('water_depth') = 100;               % m
-    param_map('source_depth') = 50;               % m
-    param_map('receiver_depth') = 75;             % m
-    param_map('range') = 1000;                    % m
-end 

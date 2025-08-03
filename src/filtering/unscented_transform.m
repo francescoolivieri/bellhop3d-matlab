@@ -44,10 +44,13 @@ function [mu_y, Sigma_yy, Sigma_xy] = unscented_transform(f, mu_x, Sigma_xx, s)
     % Transform sigma points through the function
     
     Y = zeros(1, 2*L+1);  % Preallocate Y (size SET TO 1, BUT SHOULD depends on output of f)
+    default_map = getDefaultParameterMap(s);
 
     parfor i = 1:(2*L+1)
   
         map = createParameterMapFromArray(sigma_points(:,i), s);
+        map = paddingSedimentParams(map, default_map);
+
         Y(:,i) = f(map);
     end
     

@@ -30,6 +30,12 @@ s.sim_accurate_3d = false; % May increase running time by 2/3 times
 s.sim_bty_splitted = false;
 
 
+% Default Parameters
+s.sim_param_sp_water = 1500;
+s.sim_param_sp_sediment = 1600;
+s.sim_param_density_sediment = 1.5;
+s.sim_param_attenuation_sediment = 0.5;
+
 
 
 %% External File References

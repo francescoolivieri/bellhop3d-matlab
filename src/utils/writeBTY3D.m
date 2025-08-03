@@ -90,11 +90,14 @@ try
     end
 
     fprintf( fid, '%d \n', num_sediment_types);
+    sp_arr = map('sound_speed_sediment');
+    rho_arr = map('density_sediment');
+    att_arr = map('attenuation_sediment');
     for i = 1:num_sediment_types
 
         % Temporary solution
-        arr = map('sound_speed_sediment');
-        fprintf( fid, '%f 0 %f %f 0 \n',  arr(i), map('density_sediment'), map('attenuation_sediment'));
+        
+        fprintf( fid, '%f 0 %f %f 0 \n',  sp_arr(i), rho_arr(i), att_arr(i));
 
     end
 

@@ -66,7 +66,7 @@ function [data, s] = initializeParameterMaps(s, param_config)
     % Initialize parameter mapping system
     
     % Define all possible parameters and their default values
-    default_params = getDefaultParameterMap();
+    default_params = getDefaultParameterMap(s);
     
     % Initialize true parameter map with defaults
     data.true_params = default_params;
@@ -148,30 +148,14 @@ function [data, s] = initializeParameterMaps(s, param_config)
     data.th = getParameterArray(data.true_params, s.estimation_param_names);
     data.th_est = getParameterArray(data.estimated_params, s.estimation_param_names);
 
-    
-
-    fprintf("ADD CONTROL THETAS SEDIMENT\n");
-
-end
-
-function param_map = getDefaultParameterMap()
-    % Define all possible parameters and their default values
-    param_map = containers.Map();
-    
-    % Acoustic parameters
-    param_map('sound_speed_water') = 1500;        % m/s
-    param_map('sound_speed_sediment') = 1600;     % m/s
-    param_map('density_sediment') = 1.5;            % g/cm³
-    param_map('attenuation_sediment') = 0.5;        % dB/λ
-    
-    % Geometric parameters
-    param_map('water_depth') = 100;               % m
-    param_map('source_depth') = 50;               % m
-    param_map('receiver_depth') = 75;             % m
-    param_map('range') = 1000;                    % m
-
+    % TODO: Control on bty parameters
+    data.true_params = paddingSedimentParams(data.true_params, default_params);
+    data.estimated_params = paddingSedimentParams(data.estimated_params, default_params);
+    % printMap(data.true_params)
+    % printMap(data.estimated_params)
 
 end
+
 
 function param_array = getParameterArray(param_map, param_names)
 
@@ -181,6 +165,7 @@ function param_array = getParameterArray(param_map, param_names)
     for i = 1:length(unique(param_names))
         if isKey(param_map, param_names{i})
             values = param_map(param_names{i});
+
             for j = 1:length(values)
                 param_array(cont) = values(j);
                 cont = cont+1;
