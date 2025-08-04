@@ -179,6 +179,9 @@ hold on
 scatter3(data.x(1:idx), data.y(1:idx), data.z(1:idx), 50, 'b', 'filled');
 % Highlight current position
 scatter3(data.x(idx), data.y(idx), data.z(idx), 100, 'r', 'filled', 'MarkerEdgeColor', 'k');
+% Highlight source position
+scatter3(s.sim_sender_x, s.sim_sender_y, s.sim_sender_depth, 100, 'green', 'filled', 'MarkerEdgeColor', 'k');
+
 
 % Set axis properties
 axis([s.x_min s.x_max s.y_min s.y_max s.z_min s.z_max])

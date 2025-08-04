@@ -26,7 +26,7 @@ function data = rrt_star_based_nbv(data, s, idx)
             path_cost = node.cost; % Cost from RRT* optimization
             
             % Combine information gain with path efficiency
-            score = info_gain - 0.1 * path_cost; % Prefer high info gain, low path cost
+            score = info_gain - 0.0 * path_cost; % Prefer high info gain, low path cost
             
             if score > best_score
                 best_score = score;
@@ -59,12 +59,15 @@ function rrt_tree = build_rrt_star_exploration_tree(start_pos, s)
             rand_point = sample_random_position(s);
         end
         
+        fprintf("RRT* rand_point: %f %f %f", rand_point);
+
         % Find nearest node
         [nearest_idx, nearest_node] = find_nearest_node(rrt_tree, rand_point);
         
         % Extend toward random point
         new_pos = extend_toward_point(nearest_node.position, rand_point, s.rrt_step_size, s);
-
+        
+        fprintf("\t RRT* node_ext_point : %f %f %f", new_pos);
         
         if is_valid_position(new_pos, s)
             % Find nodes within search radius
@@ -82,6 +85,8 @@ function rrt_tree = build_rrt_star_exploration_tree(start_pos, s)
                     best_parent = near_idx;
                 end
             end
+
+            fprintf("\t RRT* best_parent : %f %f %f \n", rrt_tree.nodes(best_parent).position);
             
             % Add new node
             new_idx = length(rrt_tree.nodes) + 1;

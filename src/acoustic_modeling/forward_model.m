@@ -34,7 +34,6 @@ bellhop3d(filename);
 % Read data
 [~, ~, ~, ~, ~, Pos, pressure ] = read_shd([filename '.shd']);
 
-
 % Get number of bearing angles
 num_bearings = length(Pos.theta);
 

@@ -48,7 +48,7 @@ function [data, s, sceneFigure] = setupUnderwaterSimulation(varargin)
     % Generate .bty file using true parameter values
     if s.sim_use_bty_file
         writeBTY3D(s.bellhop_file_name + ".bty", scene, data.true_params);
-        fprintf('Wrote true BTY file.\n');
+        figure
     end
     
     % Run bellhop and draw environment

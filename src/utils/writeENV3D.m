@@ -48,9 +48,9 @@ att_sediment = map('attenuation_sediment');
 
 fprintf(fid, ' %.2f   %f 0 %f %f 0 /\n', s.sim_max_depth, ss_sediment(1) , rho_sediment(1), att_sediment(1));   %fprintf(fid, ' %.2f   %.2f 0.0 1.5 0.5 /\n', s.sim_max_depth, s.bottom_ssp);
 fprintf(fid, '1                 ! NSx number of source coordinates in x\n');
-fprintf(fid, '0.0 /             ! x coordinate of source (km)\n');
+fprintf(fid, '%.2f /             ! x coordinate of source (km)\n', s.sim_sender_x);
 fprintf(fid, '1                 ! NSy number of source coordinates in y\n');
-fprintf(fid, '0.0 /             ! y coordinate of source (km)\n');
+fprintf(fid, '%.2f /             ! y coordinate of source (km)\n', s.sim_sender_y);
 fprintf(fid, '1                 ! NSz\n');
 fprintf(fid, '%.2f /          ! Sz(1 : NSz) (m)\n', s.sim_sender_depth); 
 fprintf(fid, '200               ! NRz\n');
@@ -59,7 +59,11 @@ fprintf(fid, '1000              ! NRr\n');
 fprintf(fid, '0.0  1.5 /      ! Rr(1 : NRr ) (km)\n');
 fprintf(fid, '5                 ! Ntheta (number of bearings)\n');
 fprintf(fid, '0.0 360.0 /         ! bearing angles (degrees)\n');
-fprintf(fid, '''CG   2''          ! ''R/C/I/S''\n');
+if s.sim_accurate_3d
+    fprintf(fid, '''CG   3''          ! ''R/C/I/S''\n');
+else
+    fprintf(fid, '''CG   2''          ! ''R/C/I/S''\n');
+end
 fprintf(fid, '1001              ! Nalpha\n');
 fprintf(fid, '-89 89 /    ! alpha1, 2 (degrees) Elevation/declination angle fan\n');
 fprintf(fid, '10            ! Nbeta\n');

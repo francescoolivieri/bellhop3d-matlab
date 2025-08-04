@@ -39,7 +39,7 @@ function param_map = createParameterMapFromArray(th_array, s, reference_map)
             
             for j = i+1:length(s.estimation_param_names)
                 param_name_iter = s.estimation_param_names{j};      
-                if param_name_iter == param_name 
+                if strcmp( param_name_iter, param_name )
                     param_map(param_name) = [param_map(param_name) th_array(j)];
                     params_added(j) = 1;
                 end
