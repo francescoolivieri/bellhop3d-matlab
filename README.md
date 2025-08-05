@@ -8,23 +8,8 @@
 
 ## 🎯 Overview
 
-This project implements **Bayesian estimation of underwater bottom acoustic parameters** using **3D acoustic field modeling** and **intelligent sensor placement**. The system estimates critical bottom properties (sound speed, density, reflection coefficients) that are essential for:
-
-- **🌊 Underwater Communication Systems**: Channel characterization and link budget analysis
-- **🛡️ Naval Applications**: Sonar performance prediction and submarine detection
-- **🔬 Marine Geophysics**: Seabed property mapping and geological surveys
-- **🐋 Marine Biology**: Acoustic habitat characterization and species monitoring
-
+This project implements **Bayesian estimation of underwater bottom acoustic parameters** using **3D acoustic field modeling** and **intelligent sensor placement**. The system can estimate critical bottom properties sound speed, density, reflection coefficients and more.
 ## 🔬 Scientific Approach
-
-### **Core Innovation: Bayesian Bottom Parameter Estimation**
-The system estimates **bottom reflection parameters** (θ) using:
-
-```
-θ = [θ₁, θ₂]ᵀ where:
-θ₁ ≈ Bottom sound speed [m/s]        (prior: 1600 ± 20 m/s)
-θ₂ ≈ Bottom density/reflection factor (prior: 1.5 ± 0.1)
-```
 
 ### **Methodology Pipeline:**
 
@@ -41,15 +26,10 @@ The system estimates **bottom reflection parameters** (θ) using:
 3. **🚁 Intelligent Sensor Placement**
    - Next-Best-View (NBV) planning for optimal measurement locations
    - Multiple planning strategies (RRT*, information gain, multi-objective)
-   - Vehicle-aware path planning for autonomous platforms
 
-4. **⚙️ Real-time Implementation**
-   - Efficient acoustic simulation with BELLHOP3D
-   - Adaptive measurement strategies
-   - Autonomous vehicle integration (drones, boats, AUVs)
 
 ## 🏗️ Project Structure
-
+Still to define.
 ```
 UnderwaterModeling3D/
 ├── 📁 src/                          # Core Implementation
@@ -128,14 +108,6 @@ startup  % Adds all paths and checks BELLHOP installation
 
 % 2. Run basic bottom parameter estimation
 mission_main  % Complete estimation workflow
-
-% 3. Visualize 3D acoustic field  
-s = get_sim_settings();
-demo_3d_acoustic_field(s)
-
-% 4. Try adaptive sensor placement
-s.nbv_method = 'rrt_star_nbv';  % Optimal for vehicle platforms
-data = pos_next_measurement_sota(data, s);
 ```
 
 ## 🔬 Core Algorithms
@@ -145,9 +117,9 @@ data = pos_next_measurement_sota(data, s);
 The forward model predicts transmission loss at any 3D position given bottom parameters:
 
 ```matlab
-% θ = [bottom_sound_speed, bottom_density]
+% map = {"density_sediment" = 1.5, "sound_speed_sediment" = 1600, ...}
 % pos = [x, y, z] measurement positions  
-transmission_loss = forward_model(theta, pos, settings);
+transmission_loss = forward_model(map, pos, settings);
 ```
 
 **Implementation:**
@@ -161,9 +133,8 @@ transmission_loss = forward_model(theta, pos, settings);
 Unscented Kalman Filter for real-time parameter tracking:
 
 ```matlab
-% UKF prediction-update cycle
-[theta_pred, Sigma_pred] = ukf_predict(theta, Sigma, process_noise);
-[theta_est, Sigma_est] = ukf_update(theta_pred, Sigma_pred, measurement, forward_model);
+% UKF prediction-update cycle at time t
+[theta_est(t), Sigma_est(t)] = step_ukf_filter(measurement, forward_model, theta_est(t-1), Sigma_pred(t-1), process_noise, settings);
 ```
 
 **Features:**
@@ -181,7 +152,7 @@ Multiple NBV strategies optimized for different platforms:
 | `rrt_star_nbv` | **Autonomous vehicles** | Optimal paths with vehicle constraints |
 | `information_gain` | **Static sensors** | Direct information optimization |
 | `multi_objective` | **Mission planning** | Balances multiple objectives |
-| `uncertainty_guided` | **GP-based modeling** | Leverages spatial correlations |
+| `tree_memoized` | **Simple tree-based approach** | Scan its surroundings |
 
 ## 📊 Scientific Validation
 
@@ -189,7 +160,7 @@ Multiple NBV strategies optimized for different platforms:
 ```matlab
 validate_acoustic_model()  % Compare with analytical solutions
 ```
-
+IDEAS:
 ### **Parameter Estimation Accuracy**
 ```matlab
 test_parameter_estimation()  % Monte Carlo validation studies
@@ -199,37 +170,6 @@ test_parameter_estimation()  % Monte Carlo validation studies
 ```matlab
 benchmark_nbv_methods()  % Comprehensive performance comparison
 ```
-
-## 🌊 Applications & Use Cases
-
-### **Underwater Communication Systems**
-- **Channel Characterization**: Predict communication performance
-- **Link Budget Analysis**: Estimate range and reliability
-- **Network Deployment**: Optimal node placement strategies
-
-```matlab
-% Example: Communication channel analysis
-s = get_sim_settings();
-s.sim_frequency = 25000;  % 25 kHz communication frequency
-s.bottom_type = 'sandy';  % Sandy bottom environment
-[theta_est, uncertainty] = estimate_bottom_parameters(s);
-channel_performance = predict_communication_range(theta_est, s);
-```
-
-### **Naval & Defense Applications**
-- **Sonar Performance**: Bottom loss modeling for active sonar
-- **ASW Operations**: Submarine detection probability maps
-- **Mine Warfare**: Acoustic signature modeling
-
-### **Marine Geophysics**
-- **Seabed Classification**: Automated bottom type identification  
-- **Geological Surveys**: Sub-bottom parameter mapping
-- **Resource Exploration**: Acoustic impedance estimation
-
-### **Environmental Monitoring**
-- **Habitat Mapping**: Acoustic characterization of marine environments
-- **Climate Studies**: Long-term bottom property changes
-- **Ecosystem Assessment**: Benthic community habitat quality
 
 ## ⚙️ Configuration
 
@@ -242,9 +182,6 @@ s.OceanDepth = 40;           % Water depth [m]
 s.sim_frequency = 1000;      % Acoustic frequency [Hz]
 s.bottom_ssp = 1550;         % Bottom sound speed [m/s]
 
-% Bottom parameter priors
-s.mu_th = [1600; 1.5];       % [sound speed; density] prior mean
-s.Sigma_th = diag([20, 0.1].^2);  % Prior covariance
 ```
 
 ### **Estimation Parameters**
@@ -259,55 +196,6 @@ s.nbv_method = 'rrt_star_nbv';  % Planning algorithm
 s.depth = 3;                    % Planning horizon [steps]
 ```
 
-## 🧪 Advanced Examples
-
-### **Multi-Frequency Analysis**
-```matlab
-frequencies = [100, 500, 1000, 5000];  % Hz
-for f = frequencies
-    s.sim_frequency = f;
-    [theta_est(f), confidence(f)] = run_parameter_estimation(s);
-end
-analyze_frequency_dependence(theta_est, confidence);
-```
-
-### **Adaptive Measurement Campaign**
-```matlab
-% Autonomous underwater vehicle survey
-s.vehicle_type = 'auv';
-s.nbv_method = 'multi_objective';
-s.mission_duration = 3600;  % seconds
-results = run_adaptive_survey(s);
-```
-
-### **Real-time Processing**
-```matlab
-% Stream processing for real-time estimation
-data_stream = initialize_measurement_stream();
-while data_stream.has_data()
-    measurement = data_stream.get_next();
-    [theta, Sigma] = update_parameter_estimate(theta, Sigma, measurement);
-    next_position = plan_next_measurement(theta, Sigma, s);
-    send_vehicle_command(next_position);
-end
-```
-
-## 🔧 Development & Extension
-
-### **Adding New Bottom Models**
-1. Extend `forward_model.m` with new parameter types
-2. Update prior distributions in `get_sim_settings.m`
-3. Modify BELLHOP input generation in `writeENV3D.m`
-
-### **Custom Acoustic Environments** 
-1. Create scenario in `scenarios/`
-2. Define bathymetry and sound speed profiles
-3. Set appropriate boundary conditions
-
-### **New Sensor Platforms**
-1. Define motion constraints in `motion_models/`
-2. Implement platform-specific NBV planning
-3. Add vehicle dynamics if needed
 
 ## 📚 Documentation
 
@@ -338,7 +226,7 @@ end
 
 3. **Acoustic Simulation Errors**:
    - Check frequency range (recommended: 100-10000 Hz)
-   - Verify bathymetry bounds and resolution
+   - Verify bathymetry bounds and resolution (CRITICAL - especially about resolution)
    - Ensure sound speed profile consistency
 
 ## 📄 Citation
