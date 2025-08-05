@@ -44,20 +44,23 @@ function [mu_y, Sigma_yy, Sigma_xy] = unscented_transform(f, mu_x, Sigma_xx, s)
     % Transform sigma points through the function
     
     Y = zeros(1, 2*L+1);  % Preallocate Y (size SET TO 1, BUT SHOULD depends on output of f)
-    default_map = getDefaultParameterMap(s);
+    default_map = ParameterMap(s).getMap();
 
     parfor i = 1:(2*L+1)
   
-        map = createParameterMapFromArray(sigma_points(:,i), s);
-        map = paddingSedimentParams(map, default_map);
+        map = ParameterMap(default_map, s.estimation_param_names);
+        map.update(sigma_points(:,i), map.getEstimationParameterNames );
+        % map = createParameterMapFromArray(sigma_points(:,i), s);
+        % map = paddingSedimentParams(map, default_map);
        
-        Y(:,i) = f(map);
+        Y(:,i) = f(map.getMap());
     end
     
     % Compute transformed mean
     mu_y = sum(Y .* W_m, 2);
     
     % Compute transformed covariance
+    
     Sigma_yy = zeros(size(Y,1));
     for i = 1:(2*L+1)
         diff = Y(:,i) - mu_y;

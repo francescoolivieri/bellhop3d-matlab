@@ -14,8 +14,6 @@ m=data.m(:, idx);
                 m, @(map)forward_model(map, pos, s), ...
                 data.th_est(:, idx-1), data.Sigma_est(:, :, idx-1), s.Sigma_rr, s);
  
- updateParameterEstimates(data, s, data.th_est(:, idx) );
+ data.estimated_params.update(data.th_est(:, idx)) 
 
 end
-
-

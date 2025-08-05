@@ -26,7 +26,7 @@ s.sim_range = 1.5;
 % Extensions
 s.sim_use_ssp_file = true;
 s.sim_use_bty_file = true;
-s.sim_accurate_3d = true; % May increase running time by 2/3 times
+s.sim_accurate_3d = false; % May increase running time by 2/3 times
 s.sim_bty_splitted = false;
 
 

@@ -1,15 +1,14 @@
-function generateSSP3D(s, scene)
+function [Cvol] = generateSSP3D(s, scene)
 
 %GENERATESSP Generate SSP file 
 
 % Plot measured sound speed profile
-plot_sound_speed_profile('CTD');
+% plot_sound_speed_profile('CTD');
 
 % --------------------- Build a 3-D grid ---------------------------
 x = s.Ocean_x_min:s.Ocean_step:s.Ocean_x_max;           % km east‑west
 y = s.Ocean_y_min:s.Ocean_step:s.Ocean_y_max;           % km north‑south
-max_depth = max(scene.floor, [], "all");
-z = 0:s.Ocean_z_step:s.sim_max_depth; %max_depth;        
+z = 0:s.Ocean_z_step:s.sim_max_depth; % max_depth = max(scene.floor, [], "all");  
 
 
 % x(1) = s.Ocean_x_min - 1; 
@@ -23,6 +22,7 @@ z = 0:s.Ocean_z_step:s.sim_max_depth; %max_depth;
 
 % --------------------- Generate sound‑speed volume -----------------------
 Cvol = gen_sound_speed_gp(X,Y,Z);   % use default hyper‑parameters
+
 writeSSP3D(s.bellhop_file_name, x, y, z, Cvol);
 
 end

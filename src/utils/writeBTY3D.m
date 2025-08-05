@@ -28,7 +28,7 @@ try
     nx_original = length( original_X );
     ny_original = length( original_Y );
 
-    num_sediment_types = size(map('sound_speed_sediment'), 2);
+    num_sediment_types = size(map('sound_speed_sediment'), 1);
 
     if num_sediment_types > 1000 % NOT ACCURATE
         
