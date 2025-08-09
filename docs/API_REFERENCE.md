@@ -1,64 +1,125 @@
-# API Reference – UnderwaterModeling3D
+# UnderwaterModeling3D – API Reference  
+*(package version 0.3)*
 
-> Generated for library version 0.2.0  (TODO: bump when releasing)
+---
+## Package Overview
+| Namespace | Purpose |
+|-----------|---------|
+| **`uw`** | Public façade & parameter classes |
+| **`uw.internal`** | Writers, forward model, visualisation (subject to change) |
+| **`uw.gp_modeling`** | Gaussian-process SSP utilities *(WIP)* |
+| **`uw.nbv_planning`** | Sensor-placement algorithms *(legacy – migrating)* |
 
-## Package overview
-| Package | Purpose |
-|---------|---------|
-| `uw` | Public API – façade & parameter classes |
-| `uw.internal` | Writers, forward model, visualisation (subject to change) |
-| `uw.gp_modeling` | Gaussian-process helpers for SSP field generation |
+---
+## 1  `uw.Simulation` – façade
+Owns **parameters**, **settings**, **scene** and exposes the main API.
 
-## 1. uw.SimulationParameters
+### Constructor
 ```matlab
-params = uw.SimulationParameters.default();
-params.set('sound_speed_water',1490);
-```
-* Wraps a `containers.Map` internally
-* Methods
-  * `get(key)` / `set(key,val)`
-  * `update(array,names)` – batch assign
-  * `asArray(names)` – numeric vector for filters
-
-## 2. uw.SimSettings
-Static container that keeps **all** scalar simulation settings that BELLHOP expects (frequency, depth ranges, plotting options, …). You rarely need to touch this directly; a `uw.Simulation` object exposes and stores one instance internally.
-
-## 3. uw.Simulation (main façade)
-| Method | Description |
-|--------|-------------|
-| `computeTL(pos)` | Return transmission loss (dB) at receiver positions `pos [N×3]`. |
-| `run(pos)` | Alias for `computeTL`. |
-| `visualizeEnvironment()` | Plot SSP (or ENV) plus a TL slice. |
-| *planned* `visualizeRays()` | 3-D ray tracing once implemented. |
-
-Constructor forms:
-```matlab
-sim = uw.Simulation();                     % defaults everywhere
+sim = uw.Simulation();                     % all defaults
 sim = uw.Simulation(params);               % custom parameters
 sim = uw.Simulation(params, sceneStruct);  % custom bathymetry
 ```
-`sceneStruct` must have fields `X`, `Y`, `floor` (bathymetry grid).
+`sceneStruct` fields: `X`, `Y`, `floor` (depth grid in metres).
 
-### Internal flow diagram
-```mermaid
-graph TD; A[Sim.computeTL]-->B[writeENV3D]; B-->C[BELLHOP3D]; C-->D[read_shd]; D-->E[interpolate TL];```
+### Methods
+| Method | Description |
+|--------|-------------|
+| `computeTL(pos)` | Transmission-loss at receiver positions `pos [N×3]` (x [km], y [km], z [m]). |
+| `run(pos)` | Alias for `computeTL` (legacy). |
+| `visualizeEnvironment()` | Plot SSP (or ENV) and a TL slice. |
+| *planned* `visualizeRays()` | 3-D ray tracing (road-map v0.4). |
 
-## 4. uw.gp_modeling.SSPGaussianProcess (experimental)
-Creates 3-D Gaussian-process realisations of sound-speed profiles.
+### Minimal Example
 ```matlab
-sspGP = uw.gp_modeling.SSPGaussianProcess('lengthScale',500);
-ssp   = sspGP.sampleField();   % Ny×Nx×Nz
+params = uw.SimulationParameters.default();
+sim    = uw.Simulation(params);
+pos    = [0.5 0 20; 1 0 20];   % two receivers (km km m)
+TL     = sim.computeTL(pos);
+sim.visualizeEnvironment();
 ```
-Use the generated grid with `uw.internal.writers.writeSSP3D()` or inject directly into `params.set('ssp_grid', ssp)` (automatic `.ssp` writing will come soon).
 
-## 5. Core internal helpers
-* `uw.internal.ForwardModel.computeTL(simOrMap,pos)` – thin wrapper around BELLHOP.
-* `uw.internal.writers.writeENV3D / writeBTY3D / writeSSP3D` – low-level file emitters.
-* `uw.internal.Visualization.drawEnvironment` – shared plotting logic.
+---
+## 2  `uw.SimulationParameters`
+Wrapper around a `containers.Map` storing *physical parameters*.
 
-## Deprecated functions
-All functions under `src/` remain for research reproducibility but will be removed in the next major release. Use the namespaced API instead.
+Create defaults:
+```matlab
+p = uw.SimulationParameters.default();
+p.set('sound_speed_water', 1490);   % customise
+```
+Key API
+| Method | Effect |
+|--------|--------|
+| `set(key,val)` / `get(key)` | Modify / read single parameter |
+| `update(values,names)` | Batch update (aligned arrays) |
+| `asArray(names)` | Convert subset to numeric vector |
 
-## Changelog
-* **0.2.0** – switch to package names, Simulation façade, docs refresh.
-* **0.1.x** – initial research code.
+---
+## 3  `uw.SimSettings`
+Static container for scalar simulation settings (frequency, grids etc.). Normally accessed indirectly via `uw.Simulation`, but you can:
+```matlab
+s = uw.SimSettings.default();
+s.sim_frequency = 2000;   % customise
+```
+
+---
+## 4  Internal Helpers (unstable API)
+| Helper | Role |
+|--------|------|
+| `uw.internal.ForwardModel.computeTL(simOrMap,pos)` | Thin wrapper around BELLHOP3D |
+| `uw.internal.writers.writeENV3D / writeBTY3D / writeSSP3D` | Emit input files |
+| `uw.internal.Visualization.drawEnvironment` | Shared plotting logic |
+
+---
+## 5  Gaussian-Process SSP Modelling *(experimental)*
+`uw.gp_modeling.SSPGaussianProcess` generates 3-D GP realisations:
+```matlab
+gp   = uw.gp_modeling.SSPGaussianProcess('lengthScale',500);
+ssp  = gp.sampleField();          % Ny×Nx×Nz array
+params.set('ssp_grid', ssp);      % `.ssp` automatically written
+```
+Full Bayesian inversion demo planned for v0.4.
+
+---
+## 6  Parameter-Estimation Utilities
+Located in `src/filtering` (to be namespaced). Key functions:
+| Function | Purpose |
+|----------|---------|
+| `step_ukf_filter()` | UKF prediction + update step |
+| `ukf()` | Full UKF cycle |
+| `unscented_transform()` | Core UT computation |
+
+Example forward-model handle inside UKF:
+```matlab
+fx = @(theta) sim.computeTL(theta2pos(theta));
+```
+
+---
+## 7  Sensor-Placement (NBV)
+Entry point: `pos_next_measurement_sota(data,s)` – multi-algorithm selector.
+Algorithms: `rrt_star_nbv`, `information_gain`, `multi_objective`, `tree_memoized`.
+
+---
+## 8  Utility Functions
+| Utility | Description |
+|---------|-------------|
+| `startup()` | Add paths, verify BELLHOP |
+| `clean_files(pattern)` | Remove temporary BELLHOP files |
+
+---
+## 9  Internal Flow Diagram
+```mermaid
+graph TD;
+  A[Simulation.computeTL] --> B[writeENV3D / writeBTY3D / writeSSP3D];
+  B --> C[BELLHOP3D];
+  C --> D[read_shd];
+  D --> E[Interpolate TL];
+```
+
+---
+## 10  Deprecated Symbols
+All standalone functions in `src/` are kept for research reproducibility but will be removed in the next major release. Use the namespaced API instead.
+
+---
+*Generated April 2024 – UnderwaterModeling3D team.*
