@@ -103,23 +103,32 @@ UnderwaterModeling3D/
 ### Installation & Basic Usage
 
 ```matlab
-% 1. Initialize project environment
-startup  % Adds all paths and checks BELLHOP installation
+% 1. Initialise project environment (adds /lib to path & checks BELLHOP)
+startup
 
-% 2. Run basic bottom parameter estimation
-mission_main  % Complete estimation workflow
+% 2. Create a simulation with default parameters
+params = uw.SimulationParameters.default();
+sim    = uw.Simulation(params);
+
+% 3. Query transmission loss at arbitrary receiver positions (x y z)
+rx  = [0.5 0 20;       % km, km, m
+       1.0 0  20];
+TL  = sim.computeTL(rx);
+
+% 4. Visualise SSP and transmission-loss slice
+sim.visualizeEnvironment();
 ```
 
 ## 🔬 Core Algorithms
 
 ### **3D Acoustic Forward Model**
 
-The forward model predicts transmission loss at any 3D position given bottom parameters:
+The forward model is accessed through the `uw.Simulation` façade:
 
 ```matlab
-% map = {"density_sediment" = 1.5, "sound_speed_sediment" = 1600, ...}
-% pos = [x, y, z] measurement positions  
-transmission_loss = forward_model(map, pos, settings);
+params = uw.SimulationParameters.default();
+sim    = uw.Simulation(params);
+TL     = sim.computeTL(pos);   % pos = [x y z] in km,km,m
 ```
 
 **Implementation:**
@@ -134,7 +143,7 @@ Unscented Kalman Filter for real-time parameter tracking:
 
 ```matlab
 % UKF prediction-update cycle at time t
-[theta_est(t), Sigma_est(t)] = step_ukf_filter(measurement, forward_model, theta_est(t-1), Sigma_pred(t-1), process_noise, settings);
+[theta_est(t), Sigma_est(t)] = step_ukf_filter(measurement, @(p)sim.computeTL(p), theta_est(t-1), Sigma_pred(t-1), process_noise);
 ```
 
 **Features:**

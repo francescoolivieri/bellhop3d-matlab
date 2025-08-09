@@ -83,7 +83,7 @@ classdef SSPGaussianProcess < handle
         
         function setupPredictionGrid(obj)
             % Setup 3D prediction grid based on simulation settings
-            s = get_sim_settings(); % Load simulation settings
+            s = uw.SimSettings.default(); % Load simulation settings
             
             % Create coordinate vectors
             obj.grid_x = s.Ocean_x_min:s.Ocean_step:s.Ocean_x_max;  % km
@@ -227,7 +227,7 @@ classdef SSPGaussianProcess < handle
         function writeSSPFile(obj)
             % Write current SSP estimate to file for Bellhop
             ssp_grid = obj.getCurrentSSPGrid();
-            writeSSP3D(obj.filename, obj.grid_x, obj.grid_y, obj.grid_z, ssp_grid);
+            uw.internal.writers.writeSSP3D(obj.filename, obj.grid_x, obj.grid_y, obj.grid_z, ssp_grid);
         end
         
         function uncertainty = getUncertainty(obj, positions)

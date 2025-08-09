@@ -27,7 +27,7 @@ function [data, s, sceneFigure] = setupUnderwaterSimulation(varargin)
     clean_files();
     
     % Load the simulation settings
-    s = get_sim_settings();
+    s = uw.SimSettings.default();
 
     % Initialize parameter maps using the simplified approach
     [data, s] = initializeParameterMaps(s, p.Results.Parameters);
@@ -42,17 +42,17 @@ function [data, s, sceneFigure] = setupUnderwaterSimulation(varargin)
     end
     
     % Generate .env file using true parameter values
-    writeENV3D(s.bellhop_file_name + ".env", s, data.true_params.getMap()); 
+    uw.internal.writers.writeENV3D(s.bellhop_file_name + ".env", s, data.true_params.getMap()); 
     fprintf('Wrote true ENV file.\n');
     
     % Generate .bty file using true parameter values
     if s.sim_use_bty_file
-        writeBTY3D(s.bellhop_file_name + ".bty", scene, data.true_params.getMap());
+        uw.internal.writers.writeBTY3D(s.bellhop_file_name + ".bty", scene, data.true_params.getMap());
         figure
     end
     
     % Run bellhop and draw environment
-    draw_true_env(s, scene);
+    uw.internal.Visualization.drawEnvironment(s, scene);
 
     % Print polar shd
     figure;
@@ -98,10 +98,10 @@ function [data, s] = initializeParameterMaps(s, param_config)
     % Initialize parameter mapping system (updated for simplified approach)
     
     % Define all possible parameters and their default values
-    default_params = ParameterMap(s).getMap();
+    default_params = uw.SimulationParameters(s).getMap();
     
     % Create true parameter map
-    data.true_params = ParameterMap(default_params);
+    data.true_params = uw.SimulationParameters(default_params);
     
     % Handle custom parameter configuration
     if ~isempty(param_config)
@@ -131,7 +131,7 @@ function [data, s] = initializeParameterMaps(s, param_config)
             data.true_params.update(true_values, param_config.names);
     
             % Initialize estimated parameter map (copy from true params)
-            data.estimated_params = ParameterMap(data.true_params.getMap(), s.estimation_param_names);
+            data.estimated_params = uw.SimulationParameters(data.true_params.getMap(), s.estimation_param_names);
             
             % Set initial estimates for parameters being estimated to prior means
             data.estimated_params.update(s.mu_th, s.estimation_param_names);

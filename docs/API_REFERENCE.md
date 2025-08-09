@@ -1,22 +1,23 @@
 # API Reference - UnderwaterModeling3D
 
-## 🔊 Acoustic Modeling Functions
+git add## 🔊 Acoustic Simulation API
 
-### Core Forward Model
+### `uw.Simulation` (façade)
 
-**`forward_model(theta, pos, s)`**
-- **Purpose**: 3D acoustic transmission loss prediction using BELLHOP3D
-- **Inputs**:
-  - `theta [2×1]`: Bottom parameters `[sound_speed_m/s; density_factor]`
-  - `pos [N×3]`: Measurement positions `[x_km, y_km, z_m]`
-  - `s`: Settings structure from `get_sim_settings()`
-- **Output**: `tl [N×1]`: Transmission loss in dB
-- **Example**:
-  ```matlab
-  theta = [1600; 1.5];  % Sand bottom
-  pos = [0.5, 0.0, 20]; % 500m range, 20m depth
-  tl = forward_model(theta, pos, s);
-  ```
+| Method | Description |
+|--------|-------------|
+| `computeTL(pos)` | Returns transmission-loss (dB) at receiver positions `pos [N×3]`. |
+| `visualizeEnvironment()` | Plots current SSP and a TL slice using Bellhop output. |
+
+Minimal example:
+
+```matlab
+params = uw.SimulationParameters.default();
+sim    = uw.Simulation(params);
+pos    = [0.5 0 20; 1 0 20];   % km km m
+TL     = sim.computeTL(pos);
+sim.visualizeEnvironment();
+```
 
 **`prediction_error_loss(pos, mu_th, Sigma_thth, s)`**
 - **Purpose**: Loss function for NBV planning (prediction variance)

@@ -1,5 +1,6 @@
 function startup()
     fprintf('🌊 Initializing UnderwaterModeling3D Project...\n');
+    addpath('lib');
     addpath(genpath('src'));
     addpath('scenarios');
     addpath('examples'); 
