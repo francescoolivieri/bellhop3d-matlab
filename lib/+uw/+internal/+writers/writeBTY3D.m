@@ -14,7 +14,6 @@ function writeBTY3D(name_btyfil, scene, map)
 %   bottom property layers when multiple sediment types are present.
 
 % ----------------------------------------------------------------------
-global extra_output
 
 interp_type = 'R';
 
@@ -140,7 +139,4 @@ catch ME
     error('writeBTY3D:Failure', 'Failed to write bathymetry file: %s', ME.message);
 end
 
-if extra_output
-    figure; title('Bathymetry (BTY)'); plotbdry3d(name_btyfil);
-end
 end

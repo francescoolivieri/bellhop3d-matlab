@@ -24,23 +24,32 @@ classdef ForwardModel
                 pos(:,1:2) = pos(:,1:2) * 1000;  % convert to metres for Bellhop
             end
 
-            filename = sprintf('%07d', randi([0,9999999]));
 
             % Create environment and auxiliary files
-            uw.internal.writers.writeENV3D(filename + ".env", s, map);
+            uw.internal.writers.writeENV3D(s.filename + ".env", s, map);
             if s.sim_use_bty_file
-                uw.internal.writers.writeBTY3D(filename + ".bty", scene, map);
+                uw.internal.writers.writeBTY3D(s.filename + ".bty", scene, map);
             end
+
+            
             if s.sim_use_ssp_file
-                copyfile("ac_env_model.ssp", filename + ".ssp");
+                %% SHOULD I WRITE IT EVERY TIME ?
+
+                grid_x = s.Ocean_x_min:s.Ocean_step:s.Ocean_x_max;
+                grid_y = s.Ocean_y_min:s.Ocean_step:s.Ocean_y_max;
+                grid_z = 0:s.Ocean_z_step:s.sim_max_depth;
+
+                uw.internal.writers.writeSSP3D(s.filename + ".ssp", grid_x, grid_y, grid_z, map('ssp_grid'));
+
+                %copyfile("ssp_estimate.ssp", [filename '.ssp']);
             end
             pause(0.05);
 
             % Run Bellhop
-            bellhop3d(filename);
+            bellhop3d(s.filename);
 
             % Read SHD
-            [~, ~, ~, ~, ~, Pos, pressure] = read_shd(filename + ".shd");
+            [~, ~, ~, ~, ~, Pos, pressure] = read_shd(s.filename + ".shd");
             num_bearings = length(Pos.theta);
             [rGrid, zGrid] = meshgrid(Pos.r.r, Pos.r.z);
 
@@ -60,9 +69,9 @@ classdef ForwardModel
             tl = max(tl,1e-37);
             tl = -20*log10(tl);
 
-            delete(filename + ".prt"); delete(filename + ".env"); delete(filename + ".shd");
-            if s.sim_use_bty_file, delete(filename + ".bty"); end
-            if s.sim_use_ssp_file, delete(filename + ".ssp"); end
+            % delete(filename + ".prt"); delete(filename + ".env"); delete(filename + ".shd");
+            % if s.sim_use_bty_file, delete(filename + ".bty"); end
+            % if s.sim_use_ssp_file, delete(filename + ".ssp"); end
             pause(0.05);
         end
     end

@@ -1,4 +1,4 @@
-function [mu_y, Sigma_yy, Sigma_xy] = unscented_transform(f, mu_x, Sigma_xx, s)
+function [mu_y, Sigma_yy, Sigma_xy] = unscented_transform(f, mu_x, Sigma_xx)
     % UNSCENTED_TRANSFORM Computes the Unscented Transform (UT)
     % Inputs:
     %   f         - Function handle for the nonlinear transformation y = f(x)
@@ -44,16 +44,9 @@ function [mu_y, Sigma_yy, Sigma_xy] = unscented_transform(f, mu_x, Sigma_xx, s)
     % Transform sigma points through the function
     
     Y = zeros(1, 2*L+1);  % Preallocate Y (size SET TO 1, BUT SHOULD depends on output of f)
-    default_map = uw.SimulationParameters(s).getMap();
 
     parfor i = 1:(2*L+1)
-  
-        map = uw.SimulationParameters(default_map, s.estimation_param_names);
-        map.update(sigma_points(:,i), map.getEstimationParameterNames() );
-        % map = createParameterMapFromArray(sigma_points(:,i), s);
-        % map = paddingSedimentParams(map, default_map);
-       
-        Y(:,i) = f(map.getMap());
+        Y(:,i) = f(sigma_points(:, i));
     end
     
     % Compute transformed mean

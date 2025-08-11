@@ -22,7 +22,7 @@ function data = rrt_star_based_nbv(data, s, idx)
         pos = node.position;    
         
         if is_valid_position(pos, s)
-            info_gain = calculate_information_gain(pos, data.th_est(:, idx), data.Sigma_est(:, :, idx), s);
+            info_gain = calculate_information_gain(data.sim_est, pos, data.th_est(:, idx), data.Sigma_est(:, :, idx), data.Sigma_rr);
             path_cost = node.cost; % Cost from RRT* optimization
             
             % Combine information gain with path efficiency
@@ -198,9 +198,9 @@ function new_pos = extend_toward_point(from_pos, to_pos, step_size, s)
     new_pos(3) = max(s.z_min, min(s.z_max, new_pos(3)));
     
     if sqrt(new_pos(1)^2 + new_pos(2)^2) > s.x_max 
-        v = [new_pos(1)-s.sim_sender_x, new_pos(2)-s.sim_sender_y];
+        v = [new_pos(1)-s.sim_source_x, new_pos(2)-s.sim_source_y];
         v_unit = v / norm(v);
-        q = [s.sim_sender_x, s.sim_sender_y] + s.sim_range * v_unit;
+        q = [s.sim_source_x, s.sim_source_y] + s.sim_range * v_unit;
 
         new_pos(1) = q(1);
         new_pos(2) = q(2);

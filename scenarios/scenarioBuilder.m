@@ -1,4 +1,4 @@
-function [scene, sceneFigure] = scenarioBuilder(s)
+function scene = scenarioBuilder(s)
 
 %% Define Water Surface and Ocean Environment
 % Create a water surface mesh
@@ -83,18 +83,6 @@ end
 oceanFloor = (ones(size(X))*(-s.OceanDepth)) - oceanFloor; 
 
 depthProfile = zeros(size(X)) - oceanFloor;
-
-
-sceneFigure = figure;
-title('Ocean Environment')
-% Plot ocean floor first (darker blue)
-surf(X, Y, oceanFloor, 'FaceColor', [0.1, 0.2, 0.4], 'FaceAlpha', 0.8, 'EdgeColor', 'none');
-hold on;
-
-% Plot water surface (lighter blue, semi-transparent)
-surf(X, Y, waterSurface, 'FaceColor', [0.3, 0.7, 1.0], 'FaceAlpha', 0.6, 'EdgeColor', 'none');
-
-axis on
 
 scene.X = X;
 scene.Y = Y;

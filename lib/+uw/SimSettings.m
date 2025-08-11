@@ -7,19 +7,15 @@ classdef SimSettings
             %% Ocean Settings
             s.OceanDepth = 50.;
             s.OceanFloorType = 'flat';    % flat, smooth_waves, gaussian_features, fractal_noise
-
             s.Ocean_x_min = -2; s.Ocean_x_max = 2;
             s.Ocean_y_min = -2; s.Ocean_y_max = 2;
             s.Ocean_step   = 0.2;
             s.Ocean_z_step = s.OceanDepth * 0.25;
 
             %% Bellhop simulation settings
-            s.sim_frequency      = 1000.;
             s.sim_max_depth      = 80.0;
-            s.sim_sender_x       = -0.2;
-            s.sim_sender_y       = 0.0;
-            s.sim_sender_depth   = 10.0;
             s.sim_range          = 1.5;
+            s.sim_num_bearings   = 5;   % optimal is 361 (but heavy computationally)
 
             % Extensions
             s.sim_use_ssp_file   = true;
@@ -27,53 +23,37 @@ classdef SimSettings
             s.sim_accurate_3d    = false;   % increases runtime ~3×
             s.sim_bty_splitted   = false;
 
-            % Default acoustic parameters (also copied into SimulationParameters)
+            % Default acoustic parameters & settings (!!! copied into SimulationParameters !!!)
+            % Easier to have all settings in one place
+            s.sim_source_frequency      = 1000.;
+            s.sim_source_x       = -0.2;
+            s.sim_source_y       = 0.0;
+            s.sim_source_depth   = 10.0;
             s.sim_param_sp_water            = 1500;
             s.sim_param_sp_sediment         = 1600;
             s.sim_param_density_sediment    = 1.5;
             s.sim_param_attenuation_sediment= 0.5;
 
             %% External file references
-            s.bellhop_file_name  = 'sim_env';
+            s.sim_id = sprintf('%07d', randi([0,9999999]));
+            s.filename  = ['sim_env' '_' s.sim_id];
 
-            %% UAV Measurements Settings
+            %% Measurements Settings
             s.z_min = 0;              s.z_max = s.sim_max_depth;
             s.x_min = -1.5;           s.x_max = 1.5;
             s.y_min = -1.5;           s.y_max = 1.5;
 
             % Sensor management
-            s.sm         = true;            % sensor management on/off
-            s.nbv_method = 'information_gain';
+            s.sm         = false;            % sensor management on/off
+            s.nbv_method = 'tree_memoized';
 
             %% Measurement grid
-            s.d_z = 5;    s.d_x = 0.1;  s.d_y = 0.1;  % step sizes
+            s.d_z = 5;    s.d_x = 0.5;  s.d_y = 0.5;  % step sizes
             s.z_start = 20; s.x_start = 0.5; s.y_start = 0.5;
-            s.depth  = 2;                                 % planning tree depth
+            s.depth  = 1;                                 % planning tree depth
             s.N      = 10;                                % total number of measurements
             s.sigma_tl_noise = 1;                         % measurement noise (dB)
-            s.Sigma_rr       = 1^2;                       % filter assumed noise var
 
-            %% UAV dynamics & controller
-            s.UAVSampleTime = 0.001;
-            s.Gravity       = 9.81;
-            s.DroneMass     = 0.1;
-            assignin("base", "Gravity", s.Gravity);
-            assignin("base", "DroneMass", s.DroneMass);
-
-            s.InitialPosition    = [0 0 -7];
-            s.InitialOrientation = [0 0 0];
-            % PID gains
-            s.Px = 3.5; s.Py = 3.5; s.Pz = 4.0;
-            s.Dx = 3.0; s.Dy = 3.0; s.Dz = 4.0;
-            s.Ix = 0.1; s.Iy = 0.1; s.Iz = 0.2;
-            s.Nx = 10;  s.Ny = 10;  s.Nz = 14.4947065605712;
-
-            %% Lidar settings
-            s.AzimuthResolution   = 0.5;
-            s.ElevationResolution = 2;
-            s.MaxRange            = 7;
-            s.AzimuthLimits       = [-179 179];
-            s.ElevationLimits     = [-15 15];
         end
     end
 end

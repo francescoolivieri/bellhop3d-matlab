@@ -10,7 +10,7 @@ end
 % ---------------------------------------------------------------------
 % Header and frequency
 fprintf(fid, '''True 3D profile''        ! TITLE\n');
-fprintf(fid, '%.2f                  ! FREQ (Hz)\n', s.sim_frequency);
+fprintf(fid, '%.2f                  ! FREQ (Hz)\n', map('source_frequency'));
 
 % Media layers
 fprintf(fid, '1                     ! NMEDIA\n');
@@ -39,13 +39,13 @@ att_sediment = map('attenuation_sediment');
 fprintf(fid, ' %.2f   %f 0 %f %f 0 /\n', s.sim_max_depth, ss_sediment(1), rho_sediment(1), att_sediment(1));
 
 % Source & receiver geometry ------------------------------------------------
-fprintf(fid, '1                 ! NSx\n%.2f /             ! x (km)\n', s.sim_sender_x);
-fprintf(fid, '1                 ! NSy\n%.2f /             ! y (km)\n', s.sim_sender_y);
-fprintf(fid, '1                 ! NSz\n%.2f /          ! Sz (m)\n', s.sim_sender_depth);
+fprintf(fid, '1                 ! NSx\n%.2f /             ! x (km)\n', map('source_x'));
+fprintf(fid, '1                 ! NSy\n%.2f /             ! y (km)\n', map('source_y'));
+fprintf(fid, '1                 ! NSz\n%.2f /          ! Sz (m)\n', map('source_depth'));
 
 fprintf(fid, '200               ! NRz\n0 %.2f /          ! Rz range (m)\n', s.sim_max_depth);
-fprintf(fid, '1000              ! NRr\n0.0  1.5 /      ! Rr (km)\n');
-fprintf(fid, '5                 ! Ntheta\n0.0 360.0 /         ! bearings\n');
+fprintf(fid, '1000              ! NRr\n0.0  %.2f /      ! Rr (km)\n', s.sim_range);
+fprintf(fid, '%d                 ! Ntheta\n0.0 360.0 /         ! bearings\n', s.sim_num_bearings);
 
 % Computational options -----------------------------------------------------
 if s.sim_accurate_3d

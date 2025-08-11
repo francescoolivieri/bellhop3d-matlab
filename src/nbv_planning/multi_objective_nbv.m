@@ -9,9 +9,9 @@ function data = multi_objective_nbv(data, s, idx)
         pos = candidate_positions(i, :);
         if is_valid_position(pos, s)
             % Combine multiple objectives
-            info_gain = calculate_information_gain(pos, data.th_est(:, idx), data.Sigma_est(:, :, idx), s);
+            info_gain = calculate_information_gain(data.sim_est , pos, data.th_est(:, idx), data.Sigma_est(:, :, idx), data.Sigma_rr);
             coverage = calculate_coverage_score(pos, s);
-            efficiency = calculate_efficiency_score(pos, [data.x(idx), data.y(idx), data.z(idx)], s);
+            efficiency = calculate_efficiency_score(pos, [data.x(idx), data.y(idx), data.z(idx)], data.sim_est.settings);
             
             % Weighted combination
             score = s.w_info * info_gain + s.w_coverage * coverage + s.w_efficiency * efficiency;

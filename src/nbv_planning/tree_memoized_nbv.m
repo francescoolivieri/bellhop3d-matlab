@@ -5,7 +5,7 @@ function data = tree_memoized_nbv(data, s, idx)
     
     tic
     tree = traverseTreeMemoized(tree, data.th_est(:, idx), data.Sigma_est(:, :, idx), ...
-        data.x(idx), data.y(idx), data.z(idx), s, position_cache);
+        data.x(idx), data.y(idx), data.z(idx), data.sim_est, position_cache, data.Sigma_rr);
     toc
     
     best_action = getBestActionSequence(tree);

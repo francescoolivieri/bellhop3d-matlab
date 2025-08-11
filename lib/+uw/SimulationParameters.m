@@ -61,8 +61,11 @@ classdef SimulationParameters < handle
                     length(0:initial_params.Ocean_z_step:initial_params.sim_max_depth));
 
                 % Geometric parameters
+                obj.param_map('source_frequency') = initial_params.sim_source_frequency;  % m
                 obj.param_map('water_depth') = initial_params.sim_max_depth;  % m
-                obj.param_map('source_depth') = initial_params.sim_sender_depth; % m
+                obj.param_map('source_x') = initial_params.sim_source_x; % m
+                obj.param_map('source_y') = initial_params.sim_source_y; % m
+                obj.param_map('source_depth') = initial_params.sim_source_depth; % m
                 obj.param_map('range')        = initial_params.sim_range;        % km or m ? (kept as-is)
             end
 
@@ -102,6 +105,9 @@ classdef SimulationParameters < handle
         end
 
         function update(obj, values, names)
+            % Faster than using the set method
+            % If no name provided, it updates the estimates
+
             if nargin < 3
                 names = obj.estimation_param_names;
             end
@@ -145,7 +151,7 @@ classdef SimulationParameters < handle
             obj.param_map = paddingSedimentParams(obj.param_map, default_param_map);
         end
 
-        function display(obj, titleStr)
+        function print(obj, titleStr)
             if nargin < 2, titleStr = 'Simulation Parameters'; end
             fprintf('\n=== %s ===\n', titleStr);
             disp(table(obj.param_map.keys', obj.param_map.values', 'VariableNames', {'Key', 'Value'}));
@@ -175,6 +181,82 @@ classdef SimulationParameters < handle
         function names = getEstimationParameterNames(obj)
             names = obj.estimation_param_names;
         end
+
+        function info = getParameterDisplayInfo(obj, name)
+            % Returns struct with display metadata for a given parameter key
+            % Fields: title, ylabel, unit (strings)
+            %
+            % Example:
+            %   info = params.getParameterDisplayInfo('sound_speed_water');
+            %   disp(info.title)  % "Sound Speed (Water)"
+    
+            switch name
+                % Acoustic parameters
+                case 'sound_speed_water'
+                    info.title  = 'Sound Speed (Water)';
+                    info.ylabel = 'Speed (m/s)';
+                    info.unit   = 'm/s';
+    
+                case 'sound_speed_sediment'
+                    info.title  = 'Sound Speed (Sediment)';
+                    info.ylabel = 'Speed (m/s)';
+                    info.unit   = 'm/s';
+    
+                case 'density_sediment'
+                    info.title  = 'Sediment Density';
+                    info.ylabel = 'Density (g/cm^3)';
+                    info.unit   = 'g/cm^3';
+    
+                case 'attenuation_sediment'
+                    info.title  = 'Sediment Attenuation';
+                    info.ylabel = 'Attenuation (dB/λ)';
+                    info.unit   = 'dB/λ';
+    
+                case 'ssp_grid'
+                    info.title  = 'Sound Speed Profile Grid';
+                    info.ylabel = 'Speed (m/s)';
+                    info.unit   = 'm/s';
+    
+                % Geometric parameters
+                case 'source_frequency'
+                    info.title  = 'Source Frequency';
+                    info.ylabel = 'Frequency (Hz)';
+                    info.unit   = 'Hz';
+    
+                case 'water_depth'
+                    info.title  = 'Water Depth';
+                    info.ylabel = 'Depth (m)';
+                    info.unit   = 'm';
+    
+                case 'source_x'
+                    info.title  = 'Source Position X';
+                    info.ylabel = 'X Position (m)';
+                    info.unit   = 'm';
+    
+                case 'source_y'
+                    info.title  = 'Source Position Y';
+                    info.ylabel = 'Y Position (m)';
+                    info.unit   = 'm';
+    
+                case 'source_depth'
+                    info.title  = 'Source Depth';
+                    info.ylabel = 'Depth (m)';
+                    info.unit   = 'm';
+    
+                case 'range'
+                    info.title  = 'Range';
+                    info.ylabel = 'Distance (m)';
+                    info.unit   = 'm';
+    
+                % Default for unknown parameters
+                otherwise
+                    info.title  = name;
+                    info.ylabel = name;
+                    info.unit   = '';
+            end
+        end
+        
+
     end
 
     %% Static helpers ------------------------------------------------------

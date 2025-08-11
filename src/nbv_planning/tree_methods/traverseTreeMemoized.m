@@ -1,7 +1,9 @@
-function tree = traverseTreeMemoized(tree, mu_parent, Sigma_parent, x_parent, y_parent, z_parent, s, position_cache, action_path)
-    if nargin < 9
+function tree = traverseTreeMemoized(tree, mu_parent, Sigma_parent, x_parent, y_parent, z_parent, sim, position_cache, Sigma_rr, action_path)
+    if nargin < 10
         action_path = []; % Initialize action path at root
     end
+
+    s = sim.settings;
 
     if isfield(tree, 'branch')
         % Non-leaf node: iterate through child branches (27 possible actions)
@@ -21,7 +23,8 @@ function tree = traverseTreeMemoized(tree, mu_parent, Sigma_parent, x_parent, y_
                     Sigma_updated = cached_result.Sigma;
                 else
                     % Compute and cache new result
-                    [~, Sigma_updated] = step_ukf_filter(nan, @(th)forward_model(th, [x_updated y_updated z_updated], s), mu_parent, Sigma_parent, s.Sigma_rr);
+                    fwd_model = @(theta) fwd_with_params(sim, sim.params.getEstimationParameterNames, theta, [x_updated y_updated z_updated]);
+                    [~, Sigma_updated] = step_ukf_filter(nan, fwd_model, mu_parent, Sigma_parent, Sigma_rr);
                     cached_result.Sigma = Sigma_updated;
                     cached_result.position = [x_updated, y_updated, z_updated];
                     position_cache(cache_key) = cached_result;
@@ -41,7 +44,7 @@ function tree = traverseTreeMemoized(tree, mu_parent, Sigma_parent, x_parent, y_
             new_action_path = [action_path, k];
 
             % Recursive call to process subtree
-            tree.branch(k) = traverseTreeMemoized(tree.branch(k), mu_parent, Sigma_updated, x_updated, y_updated, z_updated, s, position_cache, new_action_path);
+            tree.branch(k) = traverseTreeMemoized(tree.branch(k), mu_parent, Sigma_updated, x_updated, y_updated, z_updated, sim, position_cache, Sigma_rr, new_action_path);
         end
     else
         % Leaf node: store action sequence/path

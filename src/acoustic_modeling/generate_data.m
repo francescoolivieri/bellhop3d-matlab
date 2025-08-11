@@ -1,4 +1,4 @@
-function data=generate_data(data,s)
+function data=generate_data(data)
 
 % Get index of last state
 idx=find(isfinite(data.x),1,'last');
@@ -7,6 +7,6 @@ idx=find(isfinite(data.x),1,'last');
 pos=[data.x(idx) data.y(idx) data.z(idx)];
 
 % Generate data
-data.m(idx) = forward_model( data.true_params.getMap() , pos, s) + s.sigma_tl_noise*randn;
+data.m(idx) = data.sim_true.computeNoisyTL(pos);
 
 end

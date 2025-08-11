@@ -27,37 +27,39 @@ function [data, s, sceneFigure] = setupUnderwaterSimulation(varargin)
     clean_files();
     
     % Load the simulation settings
-    s = uw.SimSettings.default();
+    s = get_sim_settings();
 
-    % Initialize parameter maps using the simplified approach
-    [data, s] = initializeParameterMaps(s, p.Results.Parameters);
-   
     % Create chosen scenario for the simulation
     [scene, sceneFigure] = scenarioBuilder(s);
     s.scene = scene;
     
+    % Initialize parameter maps using the simplified approach
+    [data, s] = initializeParameterMaps(s, p.Results.Parameters);
+   
     % Generate a .ssp file if needed
     if s.sim_use_ssp_file
         data.true_params.set("ssp_grid", generateSSP3D(s, scene));
     end
     
     % Generate .env file using true parameter values
-    uw.internal.writers.writeENV3D(s.bellhop_file_name + ".env", s, data.true_params.getMap()); 
+    writeENV3D(s.bellhop_file_name + ".env", s, data.true_params.getMap()); 
     fprintf('Wrote true ENV file.\n');
     
     % Generate .bty file using true parameter values
     if s.sim_use_bty_file
-        uw.internal.writers.writeBTY3D(s.bellhop_file_name + ".bty", scene, data.true_params.getMap());
+        writeBTY3D(s.bellhop_file_name + ".bty", data.true_params.getMap());
         figure
     end
     
     % Run bellhop and draw environment
-    uw.internal.Visualization.drawEnvironment(s, scene);
+    draw_true_env(s, scene);
 
     % Print polar shd
-    figure;
-    plotshdpol(s.bellhop_file_name + ".shd");
-    
+    if s.sim_accurate_3d
+        figure;
+        plotshdpol(s.bellhop_file_name + ".shd");
+    end
+
     % Initialize filter
     data = init_filter(data, s);
    
@@ -98,10 +100,10 @@ function [data, s] = initializeParameterMaps(s, param_config)
     % Initialize parameter mapping system (updated for simplified approach)
     
     % Define all possible parameters and their default values
-    default_params = uw.SimulationParameters(s).getMap();
+    default_params = ParameterMap(s).getMap();
     
     % Create true parameter map
-    data.true_params = uw.SimulationParameters(default_params);
+    data.true_params = ParameterMap(default_params);
     
     % Handle custom parameter configuration
     if ~isempty(param_config)
@@ -109,7 +111,13 @@ function [data, s] = initializeParameterMaps(s, param_config)
         if strcmp(param_config.names(1), 'ssp_grid')
             
             disp('Estimating ssp_grid. (Find better solution)')
-           
+            s.estimation_param_names = param_config.names;
+            s.mu_th = 0.;
+            s.Sigma_th = [0];
+
+            % Initialize estimated parameter map (copy from default)
+            data.estimated_params = ParameterMap(default_params, s.estimation_param_names);
+
         else
 
             % Validate parameter structure
@@ -131,7 +139,7 @@ function [data, s] = initializeParameterMaps(s, param_config)
             data.true_params.update(true_values, param_config.names);
     
             % Initialize estimated parameter map (copy from true params)
-            data.estimated_params = uw.SimulationParameters(data.true_params.getMap(), s.estimation_param_names);
+            data.estimated_params = ParameterMap(data.true_params.getMap(), s.estimation_param_names);
             
             % Set initial estimates for parameters being estimated to prior means
             data.estimated_params.update(s.mu_th, s.estimation_param_names);

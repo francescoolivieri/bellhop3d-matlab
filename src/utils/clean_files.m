@@ -5,7 +5,9 @@ function clean_files()
 % Get all items in the current directory
 folder_contents = dir;
 
-% Loop through each item
+allowed_ext = {'.env', '.ssp', '.bty', '.prt', '.shd', '.ray'};
+
+
 for item = folder_contents' % Transpose to loop through items correctly
 
     % Skip if the item is a directory
@@ -13,18 +15,16 @@ for item = folder_contents' % Transpose to loop through items correctly
         continue;
     end
 
-    % Get the filename without its extension
-    [~, file_name_only, ~] = fileparts(item.name);
+    % Get file extension
+    [~, ~, file_ext] = fileparts(item.name);
 
-    % Check if the filename is exactly 7 digits using a regular expression
-    if ~isempty(regexp(file_name_only, '^\d{7}$', 'once'))
-
-        % If it matches, delete the file and notify the user
+    % Check if extension is allowed
+    if any(strcmpi(file_ext, allowed_ext))
         fprintf('Deleting file: %s\n', item.name);
         delete(item.name);
-
     end
 end
+
 
 
 end

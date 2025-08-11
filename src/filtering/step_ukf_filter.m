@@ -1,8 +1,8 @@
-function [mu_th,Sigma_thth]=step_ukf_filter(y,f,mu_th,Sigma_thth,Sigma_rr, s)
+function [mu_th,Sigma_thth]=step_ukf_filter(y,f,mu_th,Sigma_thth,Sigma_rr)
 
 
     % Apply unscented transform to estimate mean and covariance
-    [mu_tl, Sigma_tltl, Sigma_thtl] = unscented_transform(f, mu_th, Sigma_thth, s);
+    [mu_tl, Sigma_tltl, Sigma_thtl] = unscented_transform(f, mu_th, Sigma_thth);
 
     % Compute Kalman gain
     K = Sigma_thtl / (Sigma_tltl+Sigma_rr);

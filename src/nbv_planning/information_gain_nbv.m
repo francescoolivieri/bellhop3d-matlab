@@ -11,7 +11,7 @@ function data = information_gain_nbv(data, s, idx)
     for i = 1:size(candidate_positions, 1)
         pos = candidate_positions(i, :);
         if is_valid_position(pos, s)
-            info_gain = calculate_information_gain(pos, data.th_est(:, idx), data.Sigma_est(:, :, idx), s);
+            info_gain = calculate_information_gain(data.sim_est, pos, data.th_est(:, idx), data.Sigma_est(:, :, idx), data.Sigma_rr);
             if info_gain > best_info_gain
                 best_info_gain = info_gain;
                 best_pos = pos;

@@ -2,42 +2,54 @@ function plot_result(data, s)
 
 idx=find(isfinite(data.x),1,'last');
 
-
+est_params_names = data.sim_est.params.getEstimationParameterNames();
 % Plot parameter estimates over time
-for ii=1:numel(s.mu_th)
+for ii = 1:numel(data.th)
+    paramName = est_params_names{ii};  
 
-    h=zeros(1,3);
-    figure(ii+2)
-    clf
-        
-    h(1)=plot(data.th_est(ii,:),'r');
-    hold on;
-    sigma=sqrt(squeeze(data.Sigma_est(ii,ii,:)))';
-    h(2)=plot(data.th_est(ii,:)+3*sigma,'b');
-    plot(data.th_est(ii,:)-3*sigma,'b')
-    h(3)=plot(data.th(ii)*ones(size(data.th_est(ii,:))),'k');
-    legend(h,{'Mean','3*Std','True'})
-    set(gcf, 'Color', 'w');         % White figure background
-    ax = gca;
-    ax.Color = 'w';                 % White axes background
-    ax.XColor = 'k';                % Black axis lines
-    ax.YColor = 'k';
-    ax.ZColor = 'k';                % Optional (for 3D plots)
-    if ii==1
-        ylabel('Speed (m/s)')
-        title('alphaR')
-    else
-        ylabel('rho (g/cm^3)')
-        title('rho')
-    end
-    xlabel('Time step')
+    info = data.sim_est.params.getParameterDisplayInfo(paramName);
+
+    figure(ii+2);
+    clf;
+
+    % Mean estimate
+    h(1) = plot(data.th_est(ii,:), 'r'); hold on;
+
+    % Confidence bounds
+    sigma = sqrt(squeeze(data.Sigma_est(ii,ii,:)))';
+    h(2) = plot(data.th_est(ii,:) + 3*sigma, 'b');
+    plot(data.th_est(ii,:) - 3*sigma, 'b');
+
+    % True value
+    h(3) = plot(data.th(ii) * ones(size(data.th_est(ii,:))), 'k');
+
+    legend(h, {'Mean', '3*Std', 'True'});
+
+    % Apply display info
+    ylabel(info.ylabel);
+    title(info.title);
+    xlabel('Time step');
     grid minor;
+
+    % Style
+    set(gcf, 'Color', 'w');
+    ax = gca;
+    ax.Color = 'w';
+    ax.XColor = 'k';
+    ax.YColor = 'k';
+
+    % Set all text to black (title, labels, ticks)
+    ax.Title.Color      = 'k';
+    ax.XLabel.Color     = 'k';
+    ax.YLabel.Color     = 'k';
+    ax.ZLabel.Color     = 'k';
+
 end
 
 % Create 3D grid for uncertainty visualization
-x_values = s.x_min:0.3:s.x_max;
-y_values = s.y_min:0.3:s.y_max;
-z_values = s.z_min+5:5:s.OceanDepth-5;
+% x_values = s.x_min:0.3:s.x_max;
+% y_values = s.y_min:0.3:s.y_max;
+% z_values = s.z_min+5:5:s.OceanDepth-5;
 
 % % OPTION 1: Compute only 2D slice (+ EFFICIENT)
 % % Create a 2D slice at a specific y-value
@@ -79,7 +91,6 @@ z_values = s.z_min+5:5:s.OceanDepth-5;
 % colormap jet;
 % caxis([0 10])
 % cb.Label.String = 'Std (dB)';
-
 
 % % OPTION 2: Full 3D computation and extract slices
 % Uncomment this section and comment out Option 1 above
@@ -176,11 +187,12 @@ figure(100)
 clf
 plot3(data.x(1:idx), data.y(1:idx), data.z(1:idx), 'b-', 'LineWidth', 2);
 hold on
+% Highlight past positiosn
 scatter3(data.x(1:idx), data.y(1:idx), data.z(1:idx), 50, 'b', 'filled');
 % Highlight current position
-scatter3(data.x(idx), data.y(idx), data.z(idx), 100, 'r', 'filled', 'MarkerEdgeColor', 'k');
+h_current = scatter3(data.x(idx), data.y(idx), data.z(idx), 100, 'r', 'filled', 'MarkerEdgeColor', 'k');
 % Highlight source position
-scatter3(s.sim_sender_x, s.sim_sender_y, s.sim_sender_depth, 100, 'green', 'filled', 'MarkerEdgeColor', 'k');
+h_source = scatter3(s.sim_source_x, s.sim_source_y, s.sim_source_depth, 100, 'green', 'filled', 'MarkerEdgeColor', 'k');
 
 
 % Set axis properties
@@ -193,7 +205,9 @@ grid on
 title('3D Measurement Trajectory')
 view(45, 30) % Set 3D viewing angle
 
-
+% Add legend
+legend([h_source, h_current], {'Source', 'Current Position'}, 'Location', 'best');
+legend boxoff
 
 pause(0.1)
 

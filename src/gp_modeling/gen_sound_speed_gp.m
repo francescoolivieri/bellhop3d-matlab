@@ -1,4 +1,4 @@
-function Csample = gen_sound_speed_gp(gridX,gridY,gridZ)
+function Csample = gen_sound_speed_gp(gridX,gridY,gridZ,seed)
 %SAMPLE_GP_SOUND_SPEED Sample a 3D sound speed field from a GP
 %
 % Csample = SAMPLE_GP_SOUND_SPEED(X,Y,Z) returns a synthetic sound speed
@@ -9,6 +9,12 @@ function Csample = gen_sound_speed_gp(gridX,gridY,gridZ)
 %  'ell_h'     - horizontal length scale (m)
 %  'ell_v'     - vertical length scale   (m)
 %  'sigma_f'   - standard deviation of fluctuations (4 m/s)
+
+if nargin > 3 && ~isempty(seed)
+    rng(seed,'twister');
+else
+    rng(0, 'twister');
+end
 
 % Parse optional parameters
 ell_h = 300;

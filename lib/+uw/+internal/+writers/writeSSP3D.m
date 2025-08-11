@@ -6,7 +6,7 @@ c = permute(c, [3 2 1]);  % [Nz Ny Nx]
 Nx = numel(x); Ny = numel(y); Nz = numel(z);
 assert(isequal(size(c), [Nz, Ny, Nx]), 'c must be [Nz x Ny x Nx]');
 
-fid = fopen(filename + ".ssp", 'w');
+fid = fopen(filename, 'w');
 if fid == -1, error('writeSSP3D:IO', 'Could not open %s.ssp for writing.', filename); end
 
 fprintf(fid, '%d\n', Nx); fprintf(fid, '%.6f ', x); fprintf(fid, '\n');

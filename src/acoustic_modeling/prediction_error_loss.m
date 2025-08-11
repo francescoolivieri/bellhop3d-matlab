@@ -1,5 +1,7 @@
 function V = prediction_error_loss(pos, mu_th, Sigma_thth, s)
 
+s = data
+
 if sqrt(pos(1)^2 + pos(2)^2) > s.x_max
     V = 1e6;  % Large penalty
     disp(size(pos))
@@ -7,7 +9,8 @@ if sqrt(pos(1)^2 + pos(2)^2) > s.x_max
 end
 
 % Calculate parameter covariance after measurement
-[~, Sigma_thth] = step_ukf_filter(nan,@(th)forward_model_wrapper(th, pos, s),mu_th,Sigma_thth,s.Sigma_rr);
+fwd_model = @(theta) fwd_with_params(data.sim_est, data.th_names, theta, [x_updated y_updated z_updated]);
+[~, Sigma_thth] = step_ukf_filter(nan,fwd_model,mu_th,Sigma_thth,s.Sigma_rr);
 
 % Create vectors for z and r
 x_values = s.x_min:0.3:s.x_max;
@@ -28,9 +31,6 @@ Y_pred = zeros(size(pos,1),Np);
 parfor pp = 1:Np
     % Sample parameter values
     th_sample = mu_th + chol(Sigma_thth,'lower')*randn(size(mu_th));
-    
-    % Create parameter map for this sample using utility function
-    param_map_sample = createParameterMapFromArray(th_sample, s);
     
     Y_pred(:, pp) = forward_model(param_map_sample, pos, s);
 end
