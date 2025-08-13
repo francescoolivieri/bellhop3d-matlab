@@ -34,9 +34,6 @@ classdef SSPGaussianProcessMCMC < handle
         
         % Mean function (from CTD data)
         mean_func       % Function handle for prior mean
-        
-        % SSP file settings
-        filename        % Output SSP filename for forward model
 
         % MCMC results
         ssp_samples     % Cell array of SSP grid samples from the posterior
@@ -56,7 +53,6 @@ classdef SSPGaussianProcessMCMC < handle
             % Input: config struct with fields:
             %   - ell_h, ell_v, sigma_f: GP hyperparameters
             %   - tl_noise_std: TL measurement noise (dB)
-            %   - filename: output SSP filename
             %   - mcmc_iterations, mcmc_burn_in, proposal_std: MCMC params
 
             % --- GP and Likelihood Hyperparameters ---
@@ -64,7 +60,6 @@ classdef SSPGaussianProcessMCMC < handle
             obj.ell_v = config.ell_v;
             obj.sigma_f = config.sigma_f;
             obj.tl_noise_std = config.tl_noise_std;
-            obj.filename = config.filename;
 
             % --- MCMC Parameters ---
             obj.mcmc_iterations = config.mcmc_iterations;
@@ -88,14 +83,14 @@ classdef SSPGaussianProcessMCMC < handle
             fprintf('Initialization complete.\n');
         end
 
-        function update(obj, new_pos, new_tl_measurement, parameter_map)
+        function update(obj, new_pos, new_tl_measurement, sim)
             % Update the SSP estimate with a new TL measurement using MCMC.
             % This is a computationally intensive operation.
             %
             % Inputs:
             %   new_pos: [1 x 3] receiver position for the new measurement
             %   new_tl_measurement: scalar TL value (dB)
-            %   parameter_map: The ParameterMap object for the simulation
+            %   sim: The Simulation object we are performing the SSP update on
 
             fprintf('\n--- Starting MCMC Update ---\n');
             fprintf('New measurement at [%.1f, %.1f, %.1f]: %.1f dB\n', new_pos, new_tl_measurement);
@@ -109,7 +104,7 @@ classdef SSPGaussianProcessMCMC < handle
             current_ssp_flat = obj.posterior_mean_ssp(:);
             
             % Calculate the log posterior for the starting point
-            log_post_current = obj.calculate_log_posterior(current_ssp_flat, parameter_map);
+            log_post_current = obj.calculate_log_posterior(current_ssp_flat, sim);
 
             obj.ssp_samples = cell(1, obj.mcmc_iterations);
             accepted_count = 0;
@@ -124,7 +119,7 @@ classdef SSPGaussianProcessMCMC < handle
                 proposed_ssp_flat = current_ssp_flat + proposal_perturbation;
 
                 % 2. Calculate acceptance probability
-                log_post_proposed = obj.calculate_log_posterior(proposed_ssp_flat, parameter_map);
+                log_post_proposed = obj.calculate_log_posterior(proposed_ssp_flat, sim);
                 
                 % Acceptance ratio in log-space to avoid numerical underflow
                 acceptance_ratio = exp(log_post_proposed - log_post_current);
@@ -149,6 +144,10 @@ classdef SSPGaussianProcessMCMC < handle
             % --- Update Posterior Statistics ---
             obj.updatePosteriorStats();
             fprintf('Posterior mean and variance have been updated.\n');
+
+            sim.params.set('ssp_grid', obj.posterior_mean_ssp);
+            fprintf('SSP estimation updated in the simulation. \n');
+
         end
         
         function updatePosteriorStats(obj)
@@ -174,12 +173,12 @@ classdef SSPGaussianProcessMCMC < handle
             obj.posterior_var_ssp = reshape(var_ssp_flat, grid_dims);
         end
 
-        function log_p = calculate_log_posterior(obj, ssp_flat, parameter_map)
+        function log_p = calculate_log_posterior(obj, ssp_flat, sim)
             % Calculates the log posterior probability of a given SSP field.
             % log P(ssp | tl) = log P(tl | ssp) + log P(ssp)
             
             % 1. Calculate log-likelihood: log P(tl | ssp)
-            log_likelihood = obj.calculate_log_likelihood(ssp_flat, parameter_map);
+            log_likelihood = obj.calculate_log_likelihood(ssp_flat, sim);
             
             % If the likelihood is impossible, the posterior is too.
             if isinf(log_likelihood)
@@ -195,21 +194,20 @@ classdef SSPGaussianProcessMCMC < handle
 
         end
 
-        function log_likelihood = calculate_log_likelihood(obj, ssp_flat, parameter_map)
+        function log_likelihood = calculate_log_likelihood(obj, ssp_flat, sim)
             % Calculates log P(tl_obs | ssp) using the forward model.
             
             try
                 % --- Run the Forward Acoustic Model ---
                 ssp_grid = reshape(ssp_flat, [length(obj.grid_x), length(obj.grid_y), length(obj.grid_z)]);
                 
-                % Create a temporary map for the forward model call
-                map = ParameterMap(parameter_map.getMap(), parameter_map.getEstimationParameterNames());
-                map.set('ssp_grid', ssp_grid);
-                writeSSP3D(obj.filename, obj.grid_x, obj.grid_y, obj.grid_z, ssp_grid);
+                % Assign ssp field
+                sim.params.set('ssp_grid', ssp_grid);
                 
                 % This function call should simulate TL for ALL observation points
-                tl_predicted = forward_model(map, obj.X_obs, get_sim_settings());
-                 
+                tl_predicted = sim.computeTL(obj.X_obs);
+
+  
                 % --- Calculate Likelihood ---
                 % Assumes a Gaussian noise model for the TL measurements
                 residual = obj.tl_obs - tl_predicted;
@@ -231,17 +229,6 @@ classdef SSPGaussianProcessMCMC < handle
             % Using the Cholesky decomposition is more stable than inv(K_prior)
             v = obj.K_prior_chol' \ delta;
             log_prior = -0.5 * (v' * v);
-        end
-
-        function writeSSPFile(obj, filename_override)
-            % Write the posterior mean SSP estimate to a file for Bellhop
-            if nargin > 1
-                fname = filename_override;
-            else
-                fname = obj.filename;
-            end
-            fprintf('Writing posterior mean SSP to %s...\n', fname);
-            writeSSP3D(fname, obj.grid_x, obj.grid_y, obj.grid_z, obj.posterior_mean_ssp);
         end
         
         function uncertainty_grid = getUncertaintyGrid(obj)
@@ -268,7 +255,7 @@ classdef SSPGaussianProcessMCMC < handle
  
         function setupPredictionGrid(obj)
             % Setup 3D prediction grid based on simulation settings
-            s = get_sim_settings();
+            s = uw.SimSettings.default();
             obj.grid_x = s.Ocean_x_min:s.Ocean_step:s.Ocean_x_max;
             obj.grid_y = s.Ocean_y_min:s.Ocean_step:s.Ocean_y_max;
             obj.grid_z = 0:s.Ocean_z_step:s.sim_max_depth;

@@ -27,21 +27,17 @@ classdef ForwardModel
 
             % Create environment and auxiliary files
             uw.internal.writers.writeENV3D(s.filename + ".env", s, map);
+            
             if s.sim_use_bty_file
                 uw.internal.writers.writeBTY3D(s.filename + ".bty", scene, map);
             end
-
             
             if s.sim_use_ssp_file
-                %% SHOULD I WRITE IT EVERY TIME ?
-
                 grid_x = s.Ocean_x_min:s.Ocean_step:s.Ocean_x_max;
                 grid_y = s.Ocean_y_min:s.Ocean_step:s.Ocean_y_max;
                 grid_z = 0:s.Ocean_z_step:s.sim_max_depth;
 
                 uw.internal.writers.writeSSP3D(s.filename + ".ssp", grid_x, grid_y, grid_z, map('ssp_grid'));
-
-                %copyfile("ssp_estimate.ssp", [filename '.ssp']);
             end
             pause(0.05);
 

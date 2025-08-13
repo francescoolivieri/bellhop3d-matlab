@@ -6,13 +6,13 @@ clean_files();
 % Define estimate settings ------------------------------------------------
 
 % Number of iterations
-N = 2;
+N = 6;
 
 % Note: names and according values must be in the SAME order
 data.th_names   = {'sound_speed_sediment', 'density_sediment'};  % Parameters to estimate
-data.th_est = [1600; 1.5];           % Prior means
-data.Sigma_est = diag([20 0.1].^2);    % Prior covariances
-data.Sigma_rr       = 1^2;            % filter assumed noise var
+data.th_est = [1600; 1.5];              % Prior means
+data.Sigma_est = diag([20 40].^2);     % Prior covariances
+data.Sigma_rr       = 1^2;              % Filter assumed noise var
 
 % Pick ground truth from the prob. distribution
 data.th = data.th_est + chol(data.Sigma_est,'lower')*randn(size(data.th_est));
@@ -114,20 +114,34 @@ fig = figure(200); clf; set(fig, 'Color', 'w', 'Position', [100 100 950 750]);
 subplot(3,1,1); hold on;
 cols = lines(max(P,3));
 for ii = 1:P
-    plot(k, abs_err(ii,k), '-', 'LineWidth', 2, 'Color', cols(ii,:));
-    y_end = abs_err(ii, k(end));
-    % if ~isnan(rel_err_pct(ii))
-    %     text(k(end), y_end, sprintf('  %s: %.1f%%', names{ii}, rel_err_pct(ii)), ...
-    %         'Color', cols(ii,:), 'VerticalAlignment','middle');
-    % else
-    %     text(k(end), y_end, sprintf('  %s', names{ii}), ...
-    %         'Color', cols(ii,:), 'VerticalAlignment','middle');
-    % end
+    plot(k, 100 * abs_err(ii,k) ./ abs(data.th(ii)), '-', 'LineWidth', 2, 'Color', cols(ii,:));
+    
 end
-grid on; xlabel('Iteration'); ylabel('Abs. error');
+grid on; xlabel('Iteration'); ylabel('Rel. error (%)');
 title('Parameter error (lines) with final relative error (%)');
 set_integer_xticks(gca, idx_last);
 legend(names, 'Location','northeastoutside', 'Interpreter', 'none'); legend boxoff;
+
+% --- Collect all labels into one text block ---
+label_lines = cell(P,1);
+for ii = 1:P
+    if ~isnan(rel_err_pct(ii))
+        label_lines{ii} = sprintf('%s: %.1f%%', names{ii}, rel_err_pct(ii));
+    else
+        label_lines{ii} = sprintf('%s', names{ii});
+    end
+end
+label_str = strjoin(label_lines, '\n');
+
+% Add annotation outside axes (normalized coords)
+annotation('textbox', [0.72, 0.37, 0.2, 0.4], ...
+    'String', label_str, ...
+    'EdgeColor', 'none', ...
+    'Color', 'k', ...
+    'FontSize', 9, ...
+    'HorizontalAlignment', 'left', ...
+    'VerticalAlignment', 'top', ...
+    'Interpreter', 'none');
 
 % Panel 2: % remaining uncertainty per parameter (+ trace as dashed black)
 subplot(3,1,2); hold on;
@@ -148,7 +162,7 @@ scatter(xf(end), yf(end), 60, 'r', 'filled'); % end
 axis equal; grid on;
 xlim([s.x_min s.x_max]); ylim([s.y_min s.y_max]);
 xlabel('X'); ylabel('Y'); title('Sensor path (top view)');
-txt = sprintf('Total distance: %.2f m', dist_total);
+txt = sprintf('Total distance: %.2f Km', dist_total);
 annotation('textbox',[0.65 0.08 0.3 0.06],'String',txt,'EdgeColor','none','Color','k');
 
 % Style all axes

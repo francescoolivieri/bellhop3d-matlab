@@ -23,7 +23,7 @@ z = 0:s.Ocean_z_step:s.sim_max_depth; % max_depth = max(scene.floor, [], "all");
 % --------------------- Generate sound‑speed volume -----------------------
 Cvol = gen_sound_speed_gp(X,Y,Z);   % use default hyper‑parameters
 
-uw.internal.writers.writeSSP3D(s.filename, x, y, z, Cvol);
+uw.internal.writers.writeSSP3D(s.filename + ".ssp", x, y, z, Cvol);
 
 end
 
