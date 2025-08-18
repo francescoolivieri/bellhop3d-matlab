@@ -81,11 +81,6 @@ s.w_efficiency = 0.2; % Movement efficiency weight
 data = pos_next_measurement_sota(data, s);
 ```
 
-#### Enhanced Bayesian Optimization
-```matlab
-s.nbv_method = 'bayesian_opt';
-data = pos_next_measurement_sota(data, s);
-```
 
 #### RRT-Based NBV Planning (NEW!)
 ```matlab
