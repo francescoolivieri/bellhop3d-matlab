@@ -6,7 +6,7 @@ classdef SimSettings
         function s = default()
             %% Ocean Settings
             s.OceanDepth = 50.;
-            s.OceanFloorType = 'flat';    % flat, smooth_waves, gaussian_features, fractal_noise
+            s.OceanFloorType = 'flat';    % flat, smooth_waves, gaussian_features, fractal_noise (go to uw/internal/scenario/scenarioBuilder.m to tune scenario parameters)
             s.Ocean_x_min = -2; s.Ocean_x_max = 2;
             s.Ocean_y_min = -2; s.Ocean_y_max = 2;
             s.Ocean_step   = 0.2;
@@ -15,7 +15,7 @@ classdef SimSettings
             %% Bellhop simulation settings
             s.sim_max_depth      = 80.0;
             s.sim_range          = 1.5;
-            s.sim_num_bearings   = 5;   % optimal is 361 (but heavy computationally)
+            s.sim_num_bearings   = 3;   % optimal is 361 (but heavy computationally)
 
             % Extensions
             s.sim_use_ssp_file   = true;
@@ -30,7 +30,7 @@ classdef SimSettings
             s.sim_source_y       = 0.0;
             s.sim_source_depth   = 10.0;
             s.sim_param_sp_water            = 1500;
-            s.sim_param_sp_sediment         = 1600;
+            s.sim_param_sp_sediment         = 1450;
             s.sim_param_density_sediment    = 1.5;
             s.sim_param_attenuation_sediment= 0.5;
 
@@ -45,10 +45,10 @@ classdef SimSettings
 
             % Sensor management
             s.sm         = false;            % sensor management on/off
-            s.nbv_method = 'tree_memoized';
+            s.nbv_method = 'rrt_star';
 
             %% Measurement grid
-            s.d_z = 5;    s.d_x = 0.5;  s.d_y = 0.5;  % step sizes
+            s.d_z = 15;    s.d_x = 0.5;  s.d_y = 0.5;  % step sizes
             s.z_start = 20; s.x_start = 0.5; s.y_start = 0.5;
             s.depth  = 1;                                 % planning tree depth
             s.N      = 10;                                % total number of measurements

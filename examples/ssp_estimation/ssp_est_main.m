@@ -89,34 +89,6 @@ fprintf("Difference: %f \n", sum(abs(before - after), 'all'));
 % This is your best guess for the current sound speed profile
 estimated_ssp = data.ssp_estimator.posterior_mean_ssp;
 
-% --- Get the Uncertainty ---
-% This is the standard deviation at each grid point, indicating where
-% the model is most and least certain.
-ssp_uncertainty = data.ssp_estimator.getUncertaintyGrid();
-
-% % --- Visualize the Results ---
-% % For example, plot a vertical slice at a specific x, y location
-% figure;
-% subplot(1, 2, 1);
-% z_coords = data.ssp_estimator.grid_z;
-% % Assuming you want to plot the slice at the first x and y grid points
-% ssp_slice = squeeze(estimated_ssp(1, 1, :));
-% plot(ssp_slice, z_coords);
-% set(gca, 'YDir','reverse');
-% xlabel('Sound Speed (m/s)');
-% ylabel('Depth (m)');
-% title('Posterior Mean SSP Slice');
-% grid on;
-% 
-% subplot(1, 2, 2);
-% uncertainty_slice = squeeze(ssp_uncertainty(1, 1, :));
-% plot(uncertainty_slice, z_coords);
-% set(gca, 'YDir','reverse');
-% xlabel('Uncertainty (std dev, m/s)');
-% ylabel('Depth (m)');
-% title('Posterior Uncertainty');
-% grid on;
-
 
 % --- Save the Final SSP for Bellhop ---
 % You can now write the final, estimated SSP to a file for other uses.

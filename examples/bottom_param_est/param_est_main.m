@@ -6,16 +6,16 @@ clean_files();
 % Define estimate settings ------------------------------------------------
 
 % Number of iterations
-N = 6;
+N = 4;
 
 % Note: names and according values must be in the SAME order
-data.th_names   = {'sound_speed_sediment', 'density_sediment'};  % Parameters to estimate
-data.th_est = [1600; 1.5];              % Prior means
-data.Sigma_est = diag([20 40].^2);     % Prior covariances
+data.th_names   = {'sound_speed_sediment'};  % Parameters to estimate
+data.th_est = [1650];              % Prior means
+data.Sigma_est = diag([20].^2);     % Prior covariances
 data.Sigma_rr       = 1^2;              % Filter assumed noise var
 
 % Pick ground truth from the prob. distribution
-data.th = data.th_est + chol(data.Sigma_est,'lower')*randn(size(data.th_est));
+data.th = 1555.0; %data.th_est + chol(data.Sigma_est,'lower')*randn(size(data.th_est));
 
 % Setup the two environments ----------------------------------------------
 % True world
@@ -51,7 +51,7 @@ for n=2:N
     
 end
 
-plot_poster_summary(data, data.sim_est.settings, "results/")
+plot_poster_summary(data, data.sim_est.settings, "results/no_planning_2")
 
 
 function plot_poster_summary(data, s, outpath)
@@ -126,7 +126,7 @@ legend(names, 'Location','northeastoutside', 'Interpreter', 'none'); legend boxo
 label_lines = cell(P,1);
 for ii = 1:P
     if ~isnan(rel_err_pct(ii))
-        label_lines{ii} = sprintf('%s: %.1f%%', names{ii}, rel_err_pct(ii));
+        label_lines{ii} = sprintf('%s: %.4f%%', names{ii}, rel_err_pct(ii));
     else
         label_lines{ii} = sprintf('%s', names{ii});
     end

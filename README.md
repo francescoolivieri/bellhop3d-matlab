@@ -1,6 +1,6 @@
-# 🌊 UnderwaterModeling3D – Bellhop-3D MATLAB Abstraction Library
+# 🌊 Bellhop-3D MATLAB Abstraction Library
 
-UnderwaterModeling3D wraps the FORTRAN-based **BELLHOP3D** acoustic toolbox in a modern, object-oriented MATLAB package (`+uw`).  It is built for research on **bottom-parameter and sound-speed-profile (SSP) estimation**, **intelligent sensor placement (NBV)** and general 3-D underwater propagation studies.
+UnderwaterModeling3D wraps the FORTRAN-based **BELLHOP3D** acoustic toolbox in a object-oriented MATLAB package (`+uw`).  It contains some examples of applications: **bottom-parameter and sound-speed-profile (SSP) estimation**, **intelligent sensor placement (NBV)** but can be used for general 3-D underwater propagation studies.
 
 ---
 ## ✨ Key Features
@@ -10,8 +10,6 @@ UnderwaterModeling3D wraps the FORTRAN-based **BELLHOP3D** acoustic toolbox in a
 | High-level API | Single façade class **`uw.Simulation`** to configure, run and visualise scenarios |
 | Parameter management | **`uw.SimulationParameters`** (containers.Map wrapper) – default values from **`uw.SimSettings`** |
 | Automatic file generation | Internal writers emit `.env`, `.bty`, `.ssp` files for BELLHOP3D |
-| SSP field modelling | Gaussian-process utilities (`uw.gp_modeling`) – *in active development* |
-| NBV planning | Hooks for RRT*, information-gain and multi-objective planners (`uw.nbv_planning`) |
 | Namespaced code | MATLAB package isolation (`+uw`) – no global namespace pollution |
 
 ---
@@ -19,7 +17,7 @@ UnderwaterModeling3D wraps the FORTRAN-based **BELLHOP3D** acoustic toolbox in a
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/<org>/UnderwaterModeling3D.git
+   git clone https://github.com/
    cd UnderwaterModeling3D
    ```
 2. **Install BELLHOP3D** and add it to your MATLAB path
@@ -47,26 +45,27 @@ TL  = sim.computeTL(rx);
 % 3.  Visualise SSP grid + TL slice
 sim.visualizeEnvironment();
 ```
-> **Tip** `uw.Simulation` accepts a custom `scene` struct (fields `X`, `Y`, `floor`) if you want non-default bathymetry.
+> **Tip** `uw.Simulation` accepts a custom `scene` struct (fields `X`, `Y`, `floor`) if you want non-default bathymetry (`uw.SimSettings` has option to choose between flat, curves, gaussian features or fractal).
 
 ---
 ## 🔬 Scientific Workflows
 
 ### 1  Bottom-Parameter Estimation (UKF)
-*Scripts: `examples/params_est_main.m`, `tests/batch_param_est.m`*
+*Script: `examples/bottom_param_est/params_est_main.m`
 1. Initialise simulation and prior.
-2. Acquire TL measurements (real sensor or simulated).
-3. Use Unscented-Kalman filter (`src/filtering`) with `sim.computeTL` as the forward model.
+2. Acquire noisy TL measurements.
+3. Use Unscented-Kalman filter (examples/bottom_param_est/filtering`).
 4. Optionally plan next measurement with NBV utilities.
 
 ### 2  SSP-Field Estimation (MCMC – *work-in-progress*)
-*Script: `examples/ssp_est_mcmc.m`*
-1. GP prior (`uw.gp_modeling.SSPGaussianProcess`).
-2. Metropolis-Hastings chain samples SSP grid consistent with TL data.
-3. Planned release: v0.4.
+*Script: `examples/ssp_estimation/ssp_est_main.m`*
+1. Initialise SSPGaussianProcessMCMC class.
+2. Acquire noisy TL measurements.
+3. Metropolis-Hastings chain samples SSP grid consistent with TL data.
+4. Optionally plan next measurement with NBV utilities. 
 
 ### 3  Sensor-Placement (NBV)
-Algorithms in `uw.nbv_planning` pick next measurement point by information gain, RRT* or multi-objective criteria.  See `examples/nbv_planning_*` for usage.
+Algorithms in `uw.nbv_planning` pick next measurement point by information gain criteria. 
 
 ---
 ## 🗂️ Library Architecture (v0.3)
@@ -75,11 +74,11 @@ lib/+uw/
 ├── Simulation.m              % façade (run, visualise, computeTL)
 ├── SimulationParameters.m    % containers.Map wrapper
 ├── SimSettings.m             % default scalar settings
-├── +internal/                % helpers (subject to change)
-│   ├── ForwardModel.m        % thin wrapper around BELLHOP3D
-│   ├── Visualization.m       % common plotting
-│   └── +writers/             % writeENV3D/writeBTY3D/writeSSP3D
-└── +gp_modeling/ (WIP)       % GP utilities
+└── +internal/                % helpers
+    ├── ForwardModel.m        % thin wrapper around BELLHOP3D
+    ├── Visualization.m       % common plotting
+    ├── +scenario/            % setup the bathymetry and altimetry environment
+    └── +writers/             % writeENV3D/writeBTY3D/writeSSP3D
 ```
 Legacy research code is retained in `src/` but will migrate into namespaced packages over time.
 
@@ -88,31 +87,33 @@ Legacy research code is retained in `src/` but will migrate into namespaced pack
 | File | Description |
 |------|-------------|
 | `examples/params_est_main.m` | Bottom parameter estimation with UKF + NBV planning |
-| `examples/ssp_est_mcmc.m`    | Prototype SSP-grid estimation via MCMC (ongoing) |
+| `examples/ssp_est_main.m`    | Prototype SSP-grid estimation via MCMC (ongoing) |
 | `examples/test.m`            | Minimal TL query demo |
 
 Run any example after `startup` – they automatically add `lib` to the path.
 
 ---
-## 🛣️ Roadmap
-* 0.4 – Full GP-based SSP inversion example & ray-tracing visualiser (`sim.visualizeRays`)
-* 0.5 – Namespacing of all remaining `src/` modules
-* 0.6 – Python bindings via MATLAB Engine, CI test-suite
+## 🛣️ Future work
+* Full GP-based SSP inversion example & ray-tracing visualiser
+* Possibility to add multiple sources to the simulation
+* Bellhop3D using Altimetry file
+* Bathymetry more modulable (as of now if multiple types of sediment are present, the space is divided equally along the x axis)
+* Test results in the real world
+
 
 ---
 ## 📄 Licence & Citation
-Academic/non-commercial – see LICENSE.
 
 If you use this library, cite as:
 ```bibtex
 @software{underwater_modeling_3d,
   title        = {UnderwaterModeling3D: Bellhop-3D MATLAB Abstraction Library},
-  author       = {<Authors>},
-  year         = {2024},
+  author       = {Francesco Olivieri},
+  year         = {2025},
   url          = {https://github.com/<org>/UnderwaterModeling3D},
   note         = {3-D acoustic propagation, Bayesian estimation, sensor planning}
 }
 ```
 
 ---
-**Advancing underwater acoustics through open, extensible tooling.**
+**Feel free to propose and actively improve the repository.**

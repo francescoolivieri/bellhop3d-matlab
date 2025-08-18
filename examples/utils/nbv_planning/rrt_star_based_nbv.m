@@ -2,7 +2,7 @@ function data = rrt_star_based_nbv(data, s, idx)
     % RRT* based NBV planning with path optimization
     
     % Initialize RRT* parameters
-    if ~isfield(s, 'rrt_max_iter'), s.rrt_max_iter = 10; end
+    if ~isfield(s, 'rrt_max_iter'), s.rrt_max_iter = 15; end
     if ~isfield(s, 'rrt_step_size'), s.rrt_step_size = 1; end
     if ~isfield(s, 'rrt_goal_bias'), s.rrt_goal_bias = 0.05; end
     if ~isfield(s, 'rrt_search_radius'), s.rrt_search_radius = 8.0; end
@@ -59,7 +59,6 @@ function rrt_tree = build_rrt_star_exploration_tree(start_pos, s)
             rand_point = sample_random_position(s);
         end
         
-        fprintf("RRT* rand_point: %f %f %f", rand_point);
 
         % Find nearest node
         [nearest_idx, nearest_node] = find_nearest_node(rrt_tree, rand_point);
@@ -67,7 +66,6 @@ function rrt_tree = build_rrt_star_exploration_tree(start_pos, s)
         % Extend toward random point
         new_pos = extend_toward_point(nearest_node.position, rand_point, s.rrt_step_size, s);
         
-        fprintf("\t RRT* node_ext_point : %f %f %f", new_pos);
         
         if is_valid_position(new_pos, s)
             % Find nodes within search radius
@@ -86,8 +84,7 @@ function rrt_tree = build_rrt_star_exploration_tree(start_pos, s)
                 end
             end
 
-            fprintf("\t RRT* best_parent : %f %f %f \n", rrt_tree.nodes(best_parent).position);
-            
+
             % Add new node
             new_idx = length(rrt_tree.nodes) + 1;
             rrt_tree.nodes(new_idx).position = new_pos;
@@ -117,8 +114,7 @@ function rrt_tree = build_rrt_star_exploration_tree(start_pos, s)
                 end
             end
         else
-            fprintf("New pos: %f %f %f", new_pos);
-            disp("INVALID");
+            fprintf("New INVALID pos: %f %f %f. \n", new_pos);
         end
     end
 end
@@ -205,7 +201,6 @@ function new_pos = extend_toward_point(from_pos, to_pos, step_size, s)
         new_pos(1) = q(1);
         new_pos(2) = q(2);
 
-        fprintf('Closest point on the circle: (%.2f, %.2f)\n', new_pos(1), new_pos(2));
     end
 end
 

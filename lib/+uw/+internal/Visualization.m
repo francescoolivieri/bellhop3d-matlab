@@ -2,19 +2,21 @@ classdef Visualization
     % VISUALIZATION  Internal helper functions for plotting environment and TL.
 
     methods (Static)
-        function printSliceTL(sim, bearing_idx, varargin)
+        function fig = printSliceTL(sim, bearing_idx, varargin)
           
             p = inputParser;
             addParameter(p, 'ComputeBellhop', true, @islogical);
             parse(p, varargin{:});
             computeBellhop = p.Results.ComputeBellhop;
 
-            if not(isfile(sim.settings.filename + '.shd')) || computeBellhop
+            if not(isfile(sim.settings.filename + ".shd")) || computeBellhop
+
                 bellhop3d(sim.settings.filename);
             end
 
-            figure; title('Transmission loss','FontSize',10);
-            plotshdPersonalised(s.filename + ".shd", bearing_idx);
+            fig = figure; title('Transmission loss','FontSize',10);
+            plotshd(sim.settings.filename + ".shd");
+            %plotshdPersonalised("Filename", sim.settings.filename + ".shd", "BearingIdx", bearing_idx);
         end
 
         function printSSP3D()
@@ -73,8 +75,9 @@ global units
 
 % Parse input parameters
 p = inputParser;
-addParameter(p, 'BearingIdx', 1, @isinteger);
-addParameter(p, 'SourceIdx', 1, @isinteger);
+addParameter(p, 'Filename', '')
+addParameter(p, 'BearingIdx', 1, @(x) isnumeric(x) && isscalar(x));
+addParameter(p, 'SourceIdx', 1, @(x) isnumeric(x) && isscalar(x));
 parse(p, varargin{:});
 
 itheta = p.Results.BearingIdx;   % select the index of the receiver bearing
@@ -255,20 +258,4 @@ if ( jkpsflag )
    
 end
 
-
-% %% Depth-averaged TL
-% 
-% intensity = abs( pressure ).^2;
-% intensity( isnan( intensity ) ) = 1e-6;   % remove NaNs
-% intensity( isinf( intensity ) ) = 1e-6;   % remove infinities
-% 
-% TL_over_z = 10 * log10( sum ( intensity ) / length( zt ) );
-% 
-% figure( 3 )
-% % make sure units 'km' and APL figure is displayed first
-% hold on
-% plot( rt, TL_over_z, 'k', 'LineWidth', 2 )
-% xlabel( 'Range (km)')
-% ylabel( 'Depth Averaged Intensity (dB)')
-% title( { deblank( PlotTitle ); [ 'Freq = ' num2str( freq ) ' Hz    z_{src} = ' num2str( Pos.s.z( isz ) ) ' m' ] } )
-
+end

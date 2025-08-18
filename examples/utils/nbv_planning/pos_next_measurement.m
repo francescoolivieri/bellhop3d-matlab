@@ -29,14 +29,6 @@ function data = pos_next_measurement(data, s)
                 
                 %data = multi_objective_nbv(data, s, idx);
                 
-            case 'bayesian_opt' % NOT TESTED
-                % Bayesian optimization approach
-                disp("Bayesian Optimization NOT complete. Check the code and uncomment the call before running");
-                disp("Starting lawnmower...");
-                lawnmower_pattern(data, s, idx);
-                
-                %data = bayesian_optimization_nbv(data, s, idx);
-                
             otherwise
                 % Move as lawn mower
                 data = lawnmower_pattern(data, s, idx);

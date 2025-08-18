@@ -37,7 +37,7 @@ classdef Simulation < handle
             % Scene -------------------------------------------------------
             if nargin < 2 || isempty(scene)
                 % Use existing procedural builder for now
-                sc = scenarioBuilder(obj.settings);
+                sc = uw.internal.scenario.scenarioBuilder(obj.settings);
                 obj.scene = sc;
             else
                 obj.scene = scene;
@@ -95,17 +95,39 @@ classdef Simulation < handle
             axis on
         end
 
-        function printSliceTL(obj, bearing_idx)
-            
+        function fig = printSliceTL(obj, bearing_idx)
+            if nargin < 2
+                % Use existing procedural builder for now
+                bearing_idx = 1;
+            end
+
             % Check idx 
-            bearing_idx = mod(bearing_idx, obj.settings.num_bearings);
+            bearing_idx = mod(bearing_idx, obj.settings.sim_num_bearings);
             if bearing_idx == 0, bearing_idx = 1; end
 
-            uw.internal.Visualization.printSliceTL(obj, bearing_idx);
+            fig = uw.internal.Visualization.printSliceTL(obj, bearing_idx);
         end
 
         function printPolarTL(obj)
             uw.internal.Visualization.printPolarTL(obj);
+        end
+
+        function updateBellhopFiles(obj)
+
+            uw.internal.writers.writeENV3D(obj.settings.filename + ".env", obj.settings, obj.params.getMap);
+            
+            if obj.settings.sim_use_bty_file
+                uw.internal.writers.writeBTY3D(obj.settings.filename + ".bty", obj.scene, obj.params.getMap);
+            end
+            
+            if obj.settings.sim_use_ssp_file
+                grid_x = obj.settings.Ocean_x_min:obj.settings.Ocean_step:obj.settings.Ocean_x_max;
+                grid_y = obj.settings.Ocean_y_min:obj.settings.Ocean_step:obj.settings.Ocean_y_max;
+                grid_z = 0:obj.settings.Ocean_z_step:obj.settings.sim_max_depth;
+
+                uw.internal.writers.writeSSP3D(obj.settings.filename + ".ssp", grid_x, grid_y, grid_z, obj.params.get('ssp_grid'));
+            end
+            pause(0.05);
         end
 
         % function visualizeRays(obj)
