@@ -9,7 +9,7 @@ end
 
 % ---------------------------------------------------------------------
 % Header and frequency
-fprintf(fid, ''' %s Bellhop3D''        ! TITLE\n', s.filename);
+fprintf(fid, ''' %s ''        ! TITLE\n', s.filename);
 fprintf(fid, '%.2f                  ! FREQ (Hz)\n', map('source_frequency'));
 
 % Media layers

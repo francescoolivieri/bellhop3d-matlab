@@ -109,6 +109,8 @@ classdef Simulation < handle
         end
 
         function printPolarTL(obj)
+
+            % To increase accuracy of the plot -> increase settings.sim_num_bearings 
             uw.internal.Visualization.printPolarTL(obj);
         end
 

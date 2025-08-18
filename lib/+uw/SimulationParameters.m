@@ -39,7 +39,7 @@ classdef SimulationParameters < handle
 
             if nargin == 0
                 % No input → use simulation defaults
-                initial_params = get_sim_settings();
+                initial_params = uw.SimSettings.default();
             end
 
             if isa(initial_params, 'containers.Map')

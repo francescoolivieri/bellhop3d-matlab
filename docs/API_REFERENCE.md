@@ -6,9 +6,7 @@
 | Namespace | Purpose |
 |-----------|---------|
 | **`uw`** | Public façade & parameter classes |
-| **`uw.internal`** | Writers, forward model, visualisation (subject to change) |
-| **`uw.gp_modeling`** | Gaussian-process SSP utilities *(WIP)* |
-| **`uw.nbv_planning`** | Sensor-placement algorithms *(legacy – migrating)* |
+| **`uw.internal`** | Writers, forward model, scenario, visualisation |
 
 ---
 ## 1  `uw.Simulation` – façade
@@ -20,7 +18,9 @@ sim = uw.Simulation();                     % all defaults
 sim = uw.Simulation(params);               % custom parameters
 sim = uw.Simulation(params, sceneStruct);  % custom bathymetry
 ```
-`sceneStruct` fields: `X`, `Y`, `floor` (depth grid in metres).
+`sceneStruct` fields: `X` (km), `Y` (km), `floor` (depth grid in metres).
+
+`params` as `uw.SimulationParameters` that can be constructed starting from a Map.
 
 ### Methods
 | Method | Description |

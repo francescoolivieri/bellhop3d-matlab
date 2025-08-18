@@ -15,7 +15,7 @@ classdef SimSettings
             %% Bellhop simulation settings
             s.sim_max_depth      = 80.0;
             s.sim_range          = 1.5;
-            s.sim_num_bearings   = 3;   % optimal is 361 (but heavy computationally)
+            s.sim_num_bearings   = 6;   % optimal is 361 (but heavy computationally)
 
             % Extensions
             s.sim_use_ssp_file   = true;
