@@ -1,4 +1,4 @@
-function data = multi_objective_nbv(data, s, idx)
+function data = multi_objective_ipp(data, s, idx)
     % Multi-objective optimization considering exploration vs exploitation
     candidate_positions = generate_candidate_positions(data.x(idx), data.y(idx), data.z(idx), s);
     

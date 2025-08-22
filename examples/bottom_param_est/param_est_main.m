@@ -15,7 +15,7 @@ data.Sigma_est = diag([20].^2);     % Prior covariances
 data.Sigma_rr       = 1^2;              % Filter assumed noise var
 
 % Pick ground truth from the prob. distribution
-data.th = 1555.0; %data.th_est + chol(data.Sigma_est,'lower')*randn(size(data.th_est));
+data.th = data.th_est + chol(data.Sigma_est,'lower')*randn(size(data.th_est));
 
 % Setup the two environments ----------------------------------------------
 % True world
@@ -47,14 +47,14 @@ for n=2:N
     data = ukf(data);
 
     % Display result
-    plot_result(data, data.sim_true.settings);
+    plot_results(data, data.sim_true.settings);
     
 end
 
-plot_poster_summary(data, data.sim_est.settings, "results/no_planning_2")
+final_plots(data, data.sim_est.settings, "results/no_planning_2")
 
 
-function plot_poster_summary(data, s, outpath)
+function final_plots(data, s, outpath)
 % Poster summary: per-parameter error, % remaining uncertainty, top-down path
 
 idx_last = find(isfinite(data.m),1,'last');

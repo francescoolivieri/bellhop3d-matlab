@@ -1,5 +1,5 @@
 function startup()
-    fprintf('🌊 Initializing UnderwaterModeling3D Project...\n');
+    fprintf('🌊 Initializing bellhop3D-matlab Project...\n');
     addpath('lib');  
     addpath(genpath('lib'));
     addpath('examples');

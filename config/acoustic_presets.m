@@ -35,7 +35,7 @@ function s = acoustic_presets(preset_name)
             
             % Measurement strategy
             s.N = 12;                    % Sufficient for comm planning
-            s.nbv_method = 'rrt_star_nbv';  % Good for AUV deployment
+            s.ipp_method = 'rrt_star_ipp';  % Good for AUV deployment
             s.sigma_tl_noise = 0.8;      % Low noise environment
             
             % Coverage area
@@ -57,7 +57,7 @@ function s = acoustic_presets(preset_name)
             
             % Measurement strategy
             s.N = 20;                    % More measurements needed
-            s.nbv_method = 'multi_objective';  % Balance objectives
+            s.ipp_method = 'multi_objective';  % Balance objectives
             s.sigma_tl_noise = 1.5;      % Noisy deep ocean
             
             % Large coverage area
@@ -80,7 +80,7 @@ function s = acoustic_presets(preset_name)
             
             % High-resolution mapping
             s.N = 25;                    % Dense sampling
-            s.nbv_method = 'information_gain';  % Maximize information
+            s.ipp_method = 'information_gain';  % Maximize information
             s.sigma_tl_noise = 1.0;      % Moderate noise
             
             % Survey grid
@@ -102,7 +102,7 @@ function s = acoustic_presets(preset_name)
             
             % Precise requirements
             s.N = 15;                    % Focused measurements
-            s.nbv_method = 'uncertainty_guided';  % Minimize uncertainty
+            s.ipp_method = 'uncertainty_guided';  % Minimize uncertainty
             s.sigma_tl_noise = 0.5;      % High-quality sonar
             
             % Tactical area
@@ -124,7 +124,7 @@ function s = acoustic_presets(preset_name)
             
             % Ecological sampling
             s.N = 18;                    % Ecosystem coverage
-            s.nbv_method = 'multi_objective';  % Balance coverage & accuracy
+            s.ipp_method = 'multi_objective';  % Balance coverage & accuracy
             s.sigma_tl_noise = 1.2;      % Variable biological scattering
             
             % Habitat area
@@ -146,7 +146,7 @@ function s = acoustic_presets(preset_name)
             
             % High-resolution mapping
             s.N = 30;                    % Dense measurements
-            s.nbv_method = 'rrt_star_nbv';  % Optimal for AUV paths
+            s.ipp_method = 'rrt_star_ipp';  % Optimal for AUV paths
             s.sigma_tl_noise = 0.8;      % Controlled platform noise
             
             % Detailed mapping area
@@ -158,9 +158,9 @@ function s = acoustic_presets(preset_name)
             error('Unknown preset: %s\nAvailable: shallow_water_comms, deep_ocean_sonar, coastal_survey, mine_warfare, marine_biology, seabed_mapping', preset_name);
     end
     
-    % Set NBV-specific parameters based on method
-    switch s.nbv_method
-        case 'rrt_star_nbv'
+    % Set IPP-specific parameters based on method
+    switch s.ipp_method
+        case 'rrt_star_ipp'
             s.rrt_max_iter = 200;
             s.rrt_step_size = min([s.x_max-s.x_min, s.y_max-s.y_min])/20;
             s.rrt_search_radius = s.rrt_step_size * 3;
@@ -178,6 +178,6 @@ function s = acoustic_presets(preset_name)
     fprintf('  Environment: %.0fm depth, %.0f Hz\n', s.OceanDepth, s.sim_frequency);
     fprintf('  Parameters: [%.0f ± %.0f m/s, %.2f ± %.2f]\n', ...
         s.mu_th(1), sqrt(s.Sigma_th(1,1)), s.mu_th(2), sqrt(s.Sigma_th(2,2)));
-    fprintf('  Strategy: %s with %d measurements\n', s.nbv_method, s.N);
+    fprintf('  Strategy: %s with %d measurements\n', s.ipp_method, s.N);
     fprintf('  Coverage: %.1f×%.1f km area\n', s.x_max-s.x_min, s.y_max-s.y_min);
 end

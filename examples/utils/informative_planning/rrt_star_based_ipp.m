@@ -1,5 +1,5 @@
-function data = rrt_star_based_nbv(data, s, idx)
-    % RRT* based NBV planning with path optimization
+function data = rrt_star_based_ipp(data, s, idx)
+    % RRT* based IPP planning with path optimization
     
     % Initialize RRT* parameters
     if ~isfield(s, 'rrt_max_iter'), s.rrt_max_iter = 15; end

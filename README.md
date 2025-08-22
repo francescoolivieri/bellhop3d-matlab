@@ -1,6 +1,6 @@
 # 🌊 Bellhop-3D MATLAB Abstraction Library
 
-UnderwaterModeling3D wraps the FORTRAN-based **BELLHOP3D** acoustic toolbox in a object-oriented MATLAB package (`+uw`).  It contains some examples of applications: **bottom-parameter and sound-speed-profile (SSP) estimation**, **intelligent sensor placement (NBV)** but can be used for general 3-D underwater propagation studies.
+UnderwaterModeling3D wraps the FORTRAN-based **BELLHOP3D** acoustic toolbox in a object-oriented MATLAB package (`+uw`).  It contains some examples of applications: **bottom-parameter and sound-speed-profile (SSP) estimation**, **informative path planning (IPP)** but can be used for general 3-D underwater propagation studies.
 
 ---
 ## ✨ Key Features
@@ -55,17 +55,17 @@ sim.visualizeEnvironment();
 1. Initialise simulation and prior.
 2. Acquire noisy TL measurements.
 3. Use Unscented-Kalman filter (examples/bottom_param_est/filtering`).
-4. Optionally plan next measurement with NBV utilities.
+4. Optionally plan next measurement with IPP utilities.
 
 ### 2  SSP-Field Estimation (MCMC – *work-in-progress*)
 *Script: `examples/ssp_estimation/ssp_est_main.m`*
 1. Initialise SSPGaussianProcessMCMC class.
 2. Acquire noisy TL measurements.
 3. Metropolis-Hastings chain samples SSP grid consistent with TL data.
-4. Optionally plan next measurement with NBV utilities. 
+4. Optionally plan next measurement with IPP utilities. 
 
-### 3  Sensor-Placement (NBV)
-Algorithms in `uw.nbv_planning` pick next measurement point by information gain criteria. 
+### 3  Sensor-Placement (IPP)
+Algorithms in `uw.ipp_planning` pick next measurement point by information gain criteria. 
 
 ---
 ## 🗂️ Library Architecture (v0.3)
@@ -86,7 +86,7 @@ Legacy research code is retained in `src/` but will migrate into namespaced pack
 ## 📊 Implemented Examples
 | File | Description |
 |------|-------------|
-| `examples/params_est_main.m` | Bottom parameter estimation with UKF + NBV planning |
+| `examples/params_est_main.m` | Bottom parameter estimation with UKF + IPP |
 | `examples/ssp_est_main.m`    | Prototype SSP-grid estimation via MCMC (ongoing) |
 | `examples/test.m`            | Minimal TL query demo |
 

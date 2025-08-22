@@ -96,9 +96,9 @@ fx = @(theta) sim.computeTL(theta2pos(theta));
 ```
 
 ---
-## 7  Sensor-Placement (NBV)
+## 7  Sensor-Placement (IPP)
 Entry point: `pos_next_measurement_sota(data,s)` – multi-algorithm selector.
-Algorithms: `rrt_star_nbv`, `information_gain`, `multi_objective`, `tree_memoized`.
+Algorithms: `rrt_star`, `random_points`, `multi_objective`, `tree_memoized`.
 
 ---
 ## 8  Utility Functions

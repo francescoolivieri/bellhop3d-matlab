@@ -4,10 +4,10 @@ function s = default_settings()
     % This provides sensible defaults for different use cases.
     % Copy and modify as needed for your specific application.
     
-    %% NBV Planning Method Selection
-    % Options: 'rrt_star_nbv', 'multi_objective', 'information_gain', 
+    %% IPP Planning Method Selection
+    % Options: 'rrt_star_ipp', 'multi_objective', 'information_gain', 
     %          'uncertainty_guided', 'tree_memoized', 'tree_27'
-    s.nbv_method = 'rrt_star_nbv';  % Best for drone/boat planning
+    s.ipp_method = 'rrt_star_ipp';  % Best for drone/boat planning
     
     %% RRT Parameters (for RRT-based methods)
     s.rrt_max_iter = 150;        % Iterations for tree building
@@ -36,5 +36,5 @@ function s = default_settings()
     s.use_parallel = false;      % Enable parallel processing
     s.verbose = true;            % Enable progress output
     
-    fprintf('📋 Default settings loaded for method: %s\n', s.nbv_method);
+    fprintf('📋 Default settings loaded for method: %s\n', s.ipp_method);
 end

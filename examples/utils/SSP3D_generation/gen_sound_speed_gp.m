@@ -17,7 +17,7 @@ else
 end
 
 % Parse optional parameters
-ell_h = 300;
+ell_h = +inf;
 ell_v = 20;
 sigma_f =1;
 

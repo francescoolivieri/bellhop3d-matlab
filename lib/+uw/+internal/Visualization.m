@@ -42,7 +42,7 @@ classdef Visualization
             figure; title('Transmission loss','FontSize',10);
 
             % Have to modify it to chose source depth
-            plotshdpol(sim.settings.filename + ".shd");
+            plotshdpol(sim.settings.filename + ".shd" , sim.settings.sim_source_x, sim.settings.sim_source_y, sim.settings.sim_source_depth );
         end
 
         function printBTY(sim)

@@ -1,5 +1,5 @@
 function data = pos_next_measurement(data, s)
-    % State-of-the-art NBV planning with multiple approaches
+    % State-of-the-art IPP planning with multiple approaches
     
     % Get index of last state
     idx = find(isfinite(data.x), 1, 'last');
@@ -8,18 +8,18 @@ function data = pos_next_measurement(data, s)
     if s.sm
         
         % Select method based on settings
-        switch s.nbv_method
-            case 'tree_memoized'
+        switch s.ipp_method
+            case 'tree_search'
                 % Optimized tree-based approach with memoization
-                data = tree_memoized_nbv(data, data.sim_true.settings, idx);
+                data = tree_search_ipp(data, data.sim_true.settings, idx);
 
             case 'rrt_star'
-                % RRT* based NBV planning
-                data = rrt_star_based_nbv(data, s, idx);
+                % RRT* based IPP planning
+                data = rrt_star_based_ipp(data, s, idx);
                 
             case 'information_gain'
                 % Information gain-based approach 
-                data = information_gain_nbv(data, s, idx);
+                data = random_points_ipp(data, s, idx);
 
             case 'multi_objective' % NOT TESTED
                 % Multi-objective optimization approach
@@ -27,7 +27,7 @@ function data = pos_next_measurement(data, s)
                 disp("Starting lawnmower...");
                 lawnmower_pattern(data, s, idx);
                 
-                %data = multi_objective_nbv(data, s, idx);
+                %data = multi_objective_ipp(data, s, idx);
                 
             otherwise
                 % Move as lawn mower
@@ -35,6 +35,10 @@ function data = pos_next_measurement(data, s)
         end
         
     else
+
+        % data.x(idx+1) = data.x(idx);
+        % data.y(idx+1) = data.y(idx);
+        % data.z(idx+1) = data.z(idx) + 10.0;
 
         % Move as lawn mower (original behavior)
         data = lawnmower_pattern(data, s, idx);

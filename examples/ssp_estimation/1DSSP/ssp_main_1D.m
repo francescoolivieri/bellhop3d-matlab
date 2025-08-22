@@ -1,4 +1,4 @@
-% ssp_estimation_main.m
+% ssp_main_1D.m
 clc
 close all;
 
@@ -6,8 +6,12 @@ clean_files();
 
 % Define estimate settings ------------------------------------------------
 
+sim = uw.Simulation();
+generateSSP3D(sim.settings);
+
+
 % Number of iterations
-N = 4;
+N = 50;
 
 % Note: mu/Sigma for ssp_grid, taken from CTD data
 data.th_names   = {'ssp_grid'};  % Parameters to estimate
@@ -20,7 +24,7 @@ data.sim_true = uw.Simulation();
 % Estimation world
 data.sim_est = uw.Simulation();
 data.sim_est.params.setEstimationParameterNames(data.th_names); 
-data.sim_est.params.update(data.th_est, data.th_names);
+
 
 % __ init the data structure __
 % Allocate meamory for receiver positions
@@ -35,23 +39,22 @@ data.z(1) = data.sim_est.settings.z_start;
 
 % SSP Estimator setup -----------------------------------------------------
 % Initialize GP model for estimation
-config.ell_h = 400;    % horizontal correlation length (m)
-config.ell_v = 20;     % vertical correlation length (m)
-config.sigma_f = 1.0;   % Prior std dev of the SSP field (m/s)
+config.ell_h = 400;     % enforce horizontal constancy (1-D SSP)
+config.ell_v = 20;      % vertical correlation length (m)
+config.sigma_f = 2.0;   % Prior std dev of the SSP field (m/s)
 
 % Likelihood Noise
-config.tl_noise_std = 2.; % measurement noise
+config.tl_noise_std = 0.5; % measurement noise (matches computeTL without added noise)
 
-% MCMC Sample Parameters
-% Should tune these
-config.mcmc_iterations = 30; % Total steps in the MCMC chain (more the better)
-config.mcmc_burn_in = 3;      % Steps to discard to let the chain converge
-config.proposal_std = 0.05;   % Scales the size of MCMC proposal steps.
+% MCMC Sample Parameters (pCN uses proposal_std as beta)
+config.mcmc_iterations = 50;
+config.mcmc_burn_in    = 3;
+config.proposal_std    = 0.01;   % pCN beta (target ~25-35% acceptance)
 
 
 % SSP Esimator Initialization ---------------------------------------------
 % Create an instance of the class.
-data.ssp_estimator = SSPGaussianProcessMCMC(config);  
+data.ssp_estimator = SSPGPMCMC_1D(config);  
 data.sim_est.params.set('ssp_grid', data.ssp_estimator.posterior_mean_ssp);
 
 
@@ -72,8 +75,7 @@ for iter = 1:N
     % 2. Take measurement (simulate using true SSP)
     measurement = data.sim_true.computeTL(current_pos);
     
-    % 3. Update GP with sophisticated inversion (updates also the
-    % simulation
+    % 3. Update GP with inversion (updates also simulation)
     data.ssp_estimator.update(current_pos, measurement, data.sim_est);
 
     % Check status
@@ -93,10 +95,10 @@ estimated_ssp = data.ssp_estimator.posterior_mean_ssp;
 % --- Save the Final SSP for Bellhop ---
 % You can now write the final, estimated SSP to a file for other uses.
 % ssp_estimator.writeSSPFile('final_estimated_ssp.ssp');
-final_plots(data, data.sim_true.settings, 'results/plots');
+plot_ssp_poster_summary(data, data.sim_true.settings, 'results/plots');
 
 
-function final_plots(data, s, outpath)
+function plot_ssp_poster_summary(data, s, outpath)
     % Poster summary for SSP field estimation
 
     idx_last = find(isfinite(data.x), 1, 'last');
@@ -134,10 +136,10 @@ function final_plots(data, s, outpath)
     seg = sqrt(diff(xf).^2 + diff(yf).^2 + diff(zf).^2);
     dist_total = nansum(seg);
 
-    fig = figure(200); clf; set(fig, 'Color', 'w', 'Position', [100 100 900 750]);
+    fig = figure(200); clf; set(fig, 'Color', 'w', 'Position', [100 100 1200 900]);
 
     % Panel 1: RMSE vs depth
-    ax1 = subplot(3,1,1);
+    ax1 = subplot(3,2,1);
     plot(rmse_by_depth, z_coords, 'b-', 'LineWidth', 2);
     set(ax1, 'YDir','reverse'); grid(ax1,'on');
     ylim([0 s.OceanDepth]);
@@ -145,22 +147,44 @@ function final_plots(data, s, outpath)
     add_corner_note(ax1, sprintf('Mean RMSE: %.2f m/s', nanmean(rmse_by_depth)));
 
     % Panel 2: Uncertainty reduction vs depth
-    ax2 = subplot(3,1,2);
+    ax2 = subplot(3,2,2);
     plot(pct_reduction, z_coords, 'r-', 'LineWidth', 2);
     set(ax2, 'YDir','reverse'); grid(ax2,'on');
     ylim([0 s.OceanDepth]);
     xlabel('Uncertainty Reduction (%)'); ylabel('Depth (m)'); title('Uncertainty Reduction vs Depth');
     add_corner_note(ax2, sprintf('Mean reduction: %.1f%%', nanmean(pct_reduction)));
 
-    % Panel 3: Measurement locations (top view)
-    ax3 = subplot(3,1,3); hold(ax3,'on');
+    % Panel 3: True vs Estimated SSP at a representative x,y with uncertainty shading
+    ax3 = subplot(3,2,3); hold(ax3,'on');
+    % pick center indices
+    iy = round(size(true_ssp,1)/2); ix = round(size(true_ssp,2)/2);
+    true_col = squeeze(true_ssp(iy, ix, :));
+    est_col  = squeeze(est_ssp(iy, ix, :));
+    std_col  = squeeze(unc_grid(iy, ix, :));
+    % uncertainty band
+    fill([est_col-2*std_col; flipud(est_col+2*std_col)], [z_coords(:); flipud(z_coords(:))], [1 0.9 0.9], 'EdgeColor','none');
+    plot(est_col,  z_coords, 'r-', 'LineWidth', 2);
+    plot(true_col, z_coords, 'k--', 'LineWidth', 1.5);
+    set(ax3,'YDir','reverse'); grid(ax3,'on'); ylim([0 s.OceanDepth]);
+    xlabel('Sound speed (m/s)'); ylabel('Depth (m)'); title('SSP (center column) with 95% band');
+    legend({'±2σ band','Posterior mean','True'},'Location','best');
+
+    % Panel 4: Posterior standard deviation vs depth (avg over x,y)
+    ax4 = subplot(3,2,4);
+    std_by_depth = squeeze(nanmean(nanmean(unc_grid,1),2));
+    plot(std_by_depth, z_coords, 'm-', 'LineWidth', 2);
+    set(ax4,'YDir','reverse'); grid(ax4,'on'); ylim([0 s.OceanDepth]);
+    xlabel('Posterior std (m/s)'); ylabel('Depth (m)'); title('Posterior Uncertainty vs Depth');
+
+    % Panel 5: Measurement locations (top view)
+    ax5 = subplot(3,2,5); hold(ax5,'on');
     plot(xf, yf, 'b-','LineWidth',2);
     scatter(xf(1), yf(1), 40, 'g', 'filled');
     scatter(xf(end), yf(end), 60, 'r', 'filled');
     scatter(xf, yf, 30, zf, 'filled'); 
     cb = colorbar('southoutside');
     cb.Label.String = 'Depth (m)';
-    axis(ax3,'equal'); grid(ax3,'on');
+    axis(ax5,'equal'); grid(ax5,'on');
     xlim([s.x_min s.x_max]); ylim([s.y_min s.y_max]);
     xlabel('X (m)'); ylabel('Y (m)'); title('Measurement Locations (color = depth)');
     
@@ -181,6 +205,29 @@ function final_plots(data, s, outpath)
     if nargin >= 3 && ~isempty(outpath)
         if ~exist(outpath,'dir'), mkdir(outpath); end
         exportgraphics(fig, fullfile(outpath, 'ssp_poster_summary.png'), 'Resolution', 300);
+        % TL fit diagnostic: compare measured vs predicted TL at measured positions
+        try
+            n_meas = find(isfinite(data.x), 1, 'last');
+            if ~isempty(n_meas) && n_meas > 0
+                rx = [data.x(1:n_meas)', data.y(1:n_meas)', data.z(1:n_meas)'];
+                tl_true = zeros(n_meas,1);
+                tl_est  = zeros(n_meas,1);
+                for ii=1:n_meas
+                    tl_true(ii) = data.sim_true.computeTL(rx(ii,:));
+                    tl_est(ii)  = data.sim_est.computeTL(rx(ii,:));
+                end
+                fig2 = figure(201); clf; set(fig2,'Color','w','Position',[100 100 700 400]);
+                subplot(1,2,1);
+                plot(1:n_meas, tl_true, 'k-o', 1:n_meas, tl_est, 'r-s','LineWidth',1.5);
+                grid on; xlabel('Measurement #'); ylabel('TL (dB)'); title('TL: true vs estimated'); legend({'True','Estimated'},'Location','best');
+                subplot(1,2,2);
+                plot(1:n_meas, tl_true - tl_est, 'b-o','LineWidth',1.5); yline(0,'k--'); grid on;
+                xlabel('Measurement #'); ylabel('Residual (dB)'); title('TL residuals (True - Est)');
+                exportgraphics(fig2, fullfile(outpath, 'tl_diagnostics.png'), 'Resolution', 300);
+            end
+        catch ME
+            warning('TL diagnostics plotting failed: %s', ME.message);
+        end
     end
 end
 

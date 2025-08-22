@@ -11,7 +11,7 @@ classdef Simulation < handle
     %   invoking Bellhop3-D.
     %
     %   Future extensions will add: parameter estimation loops, filters,
-    %   NBV planning, etc.
+    %   IPP planning, etc.
 
     properties
         params   uw.SimulationParameters   % acoustic & geometric parameters
@@ -85,12 +85,14 @@ classdef Simulation < handle
             scenarioFigure = figure;
             title('Ocean Environment')
 
+            % plotbdry3d(obj.settings.filename + ".bty")
+                
             % Plot ocean floor first (darker blue)
-            surf(obj.scene.X, obj.scene.Y, obj.scene.oceanFloor, 'FaceColor', [0.1, 0.2, 0.4], 'FaceAlpha', 0.8, 'EdgeColor', 'none');
+            surf(obj.scene.X, obj.scene.Y, -obj.scene.floor, 'FaceColor', [0.1, 0.2, 0.4], 'FaceAlpha', 0.8, 'EdgeColor', 'none');
             hold on;
             
             % Plot water surface (lighter blue, semi-transparent)
-            surf(obj.scene.X, obj.scene.Y, obj.scene.waterSurface, 'FaceColor', [0.3, 0.7, 1.0], 'FaceAlpha', 0.6, 'EdgeColor', 'none');
+            surf(obj.scene.X, obj.scene.Y, obj.scene.surface, 'FaceColor', [0.3, 0.7, 1.0], 'FaceAlpha', 0.6, 'EdgeColor', 'none');
             
             axis on
         end

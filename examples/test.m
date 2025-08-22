@@ -5,7 +5,8 @@ clean_files();
 
 sim    = uw.Simulation();      % construct simulation environment following default settings (lib/uw/SimSettings.m)
 rx_pos = [0.5 0.5 20];         % specify receiver position
-sim.printSliceTL();
+sim.printScenario
+sim.printPolarTL();
 
 % sim    = uw.Simulation();      % construct simulation environment following default settings (lib/uw/SimSettings.m)
 % rx_pos = [0.5 0.5 20];         % specify receiver position

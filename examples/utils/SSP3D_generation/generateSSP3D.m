@@ -17,6 +17,23 @@ z = 0:s.Ocean_z_step:s.sim_max_depth;                   % m depth (we take simul
 % --------------------- Generate sound‑speed volume -----------------------
 Cvol = gen_sound_speed_gp(X,Y,Z);   % Generate ssp field with GP (default hyper‑parameters)
 
+sound_speed = Cvol(1,1, :);
+depth = unique(Z(:));
+
+Cvol_1d = repmat(sound_speed, size(Cvol));
+
+% disp(size(Cvol))
+% 
+% figure;
+%     plot(sound_speed, depth, 'b-','LineWidth',1.5);
+%     set(gca, 'YDir','reverse'); % Depth increases downward
+%     xlabel('Sound Speed (m/s)');
+%     ylabel('Depth (m)');
+%     title('Sound Speed Profile');
+%     grid on;
+% 
+
+
 uw.internal.writers.writeSSP3D(s.filename + ".ssp", x, y, z, Cvol);
 
 end
