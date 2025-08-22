@@ -17,8 +17,8 @@ UnderwaterModeling3D wraps the FORTRAN-based **BELLHOP3D** acoustic toolbox in a
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/
-   cd UnderwaterModeling3D
+   git clone https://github.com/francescoolivieri/Bellhop3D_Matlab_Abstraction_Library.git,
+   cd Bellhop3D_Matlab_Abstraction_Library
    ```
 2. **Install BELLHOP3D** and add it to your MATLAB path
    ```matlab
@@ -110,7 +110,7 @@ If you use this library, cite as:
   title        = {UnderwaterModeling3D: Bellhop-3D MATLAB Abstraction Library},
   author       = {Francesco Olivieri},
   year         = {2025},
-  url          = {https://github.com/<org>/UnderwaterModeling3D},
+  url          = {https://github.com/francescoolivieri/Bellhop3D_Matlab_Abstraction_Library.git},
   note         = {3-D acoustic propagation, Bayesian estimation, sensor planning}
 }
 ```
