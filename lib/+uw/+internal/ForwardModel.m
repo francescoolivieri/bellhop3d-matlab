@@ -5,9 +5,9 @@ classdef ForwardModel
 
     methods (Static)
         function tl = computeTL(arg1, pos, s)
-            % computeTL  Return transmission loss for receiver positions.
-            % Usage 1: tl = computeTL(sim, pos)            (preferred)
-            % Usage 2: tl = computeTL(map, pos, settings)  (legacy)
+            % computeTL  Transmission loss for receiver positions.
+            %   TL = computeTL(SIM, POS)            (preferred)
+            %   TL = computeTL(MAP, POS, SETTINGS)  (legacy)
 
             if isa(arg1, 'uw.Simulation')
                 sim = arg1;
@@ -19,7 +19,14 @@ classdef ForwardModel
                 scene = s.scene;
             end
 
-            global units
+            % Convert input coordinates to metres if Simulation uses km for x,y
+            if isa(arg1, 'uw.Simulation')
+                units = sim.units;
+            else
+                % Fallback: assume kilometres for compatibility
+                units = "km";
+            end
+
             if units == "km"
                 pos(:,1:2) = pos(:,1:2) * 1000;  % convert to metres for Bellhop
             end
@@ -33,8 +40,8 @@ classdef ForwardModel
             end
             
             if s.sim_use_ssp_file
-                grid_x = s.Ocean_x_min:s.Ocean_step:s.Ocean_x_max;
-                grid_y = s.Ocean_y_min:s.Ocean_step:s.Ocean_y_max;
+                grid_x = s.Ocean_x_min:s.OceanGridStep:s.Ocean_x_max;
+                grid_y = s.Ocean_y_min:s.OceanGridStep:s.Ocean_y_max;
                 grid_z = 0:s.Ocean_z_step:s.sim_max_depth;
 
                 uw.internal.writers.writeSSP3D(s.filename + ".ssp", grid_x, grid_y, grid_z, map('ssp_grid'));

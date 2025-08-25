@@ -42,8 +42,8 @@ sim    = uw.Simulation(params);
 rx  = [0.5 0 20; 1 0 20];
 TL  = sim.computeTL(rx);
 
-% 3.  Visualise SSP grid + TL slice
-sim.visualizeEnvironment();
+% 3.  Visualise a TL slice (bearing index 1 by default)
+sim.plotTLSlice();
 ```
 > **Tip** `uw.Simulation` accepts a custom `scene` struct (fields `X`, `Y`, `floor`) if you want non-default bathymetry (`uw.SimSettings` has option to choose between flat, curves, gaussian features or fractal).
 

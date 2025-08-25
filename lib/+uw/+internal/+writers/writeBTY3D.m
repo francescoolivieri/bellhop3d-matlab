@@ -1,17 +1,8 @@
 function writeBTY3D(name_btyfil, scene, map)
-% WRITEBTY3D  Create a bathymetry (.bty) file for Bellhop3-D.
-%   This is the same implementation previously located at lib/writers/writeBTY3D.m
-%   but now namespaced under uw.internal.writers so that end-users do not
-%   pollute the global function namespace.
-%
-%   WRITEBTY3D(NAME, SCENE, PARAMMAP)
-%      NAME   – output filename (string)
-%      SCENE  – struct with fields X, Y, floor (depth matrix)
-%      PARAMMAP – containers.Map or uw.SimulationParameters map with keys:
-%                 'sound_speed_sediment', 'density_sediment', 'attenuation_sediment'
-%
-%   The function writes an RL (rectilinear) bathymetry grid and embeds
-%   bottom property layers when multiple sediment types are present.
+% WRITEBTY3D  Create a bathymetry (.bty) file for Bellhop-3D.
+%   WRITEBTY3D(NAME, SCENE, MAP) writes RL bathymetry grid based on SCENE
+%   (fields X, Y, floor) and embeds bottom property layers from MAP
+%   ('sound_speed_sediment', 'density_sediment', 'attenuation_sediment').
 
 % ----------------------------------------------------------------------
 

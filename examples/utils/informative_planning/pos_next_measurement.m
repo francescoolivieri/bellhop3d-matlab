@@ -36,12 +36,12 @@ function data = pos_next_measurement(data, s)
         
     else
 
-        % data.x(idx+1) = data.x(idx);
-        % data.y(idx+1) = data.y(idx);
-        % data.z(idx+1) = data.z(idx) + 10.0;
+        data.x(idx+1) = data.x(idx);
+        data.y(idx+1) = data.y(idx);
+        data.z(idx+1) = data.z(idx) + s.Ocean_z_step;
 
         % Move as lawn mower (original behavior)
-        data = lawnmower_pattern(data, s, idx);
+        %data = lawnmower_pattern(data, s, idx);
     end
 end
 

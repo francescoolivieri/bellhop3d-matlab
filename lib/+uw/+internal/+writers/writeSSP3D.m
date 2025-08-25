@@ -1,6 +1,7 @@
 function writeSSP3D(filename, x, y, z, c)
-% WRITESSP3D  Write a 3-D sound-speed profile (.ssp) for Bellhop3-D.
-%   Namespaced version under uw.internal.writers.
+% WRITESSP3D  Write a 3-D sound-speed profile (.ssp) for Bellhop-3D.
+%   writeSSP3D(FILE, X, Y, Z, C) where C is [Nx x Ny x Nz] in MATLAB
+%   convention (will be permuted to Bellhop order).
 
 c = permute(c, [3 2 1]);  % [Nz Ny Nx]
 Nx = numel(x); Ny = numel(y); Nz = numel(z);

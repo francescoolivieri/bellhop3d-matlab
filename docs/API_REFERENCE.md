@@ -5,12 +5,13 @@
 ## Package Overview
 | Namespace | Purpose |
 |-----------|---------|
-| **`uw`** | Public façade & parameter classes |
+| **`uw`** | Public interface & parameter classes |
 | **`uw.internal`** | Writers, forward model, scenario, visualisation |
 
 ---
-## 1  `uw.Simulation` – façade
+## 1  `uw.Simulation` – main interface
 Owns **parameters**, **settings**, **scene** and exposes the main API.
+Units: x/y default to km (configurable via `sim.units`), depth in m.
 
 ### Constructor
 ```matlab
@@ -25,10 +26,13 @@ sim = uw.Simulation(params, sceneStruct);  % custom bathymetry
 ### Methods
 | Method | Description |
 |--------|-------------|
-| `computeTL(pos)` | Transmission-loss at receiver positions `pos [N×3]` (x [km], y [km], z [m]). |
-| `run(pos)` | Alias for `computeTL` (legacy). |
-| `visualizeEnvironment()` | Plot SSP (or ENV) and a TL slice. |
-| *planned* `visualizeRays()` | 3-D ray tracing (road-map v0.4). |
+| `computeTL(pos)` | Transmission loss at receiver positions `pos [N×3]` (x [km], y [km], z [m]). |
+| `computeTLWithNoise(pos[,sigma])` | TL with additive Gaussian noise (default `sigma` from settings). |
+| `sampleSoundSpeed(pos)` | Interpolate SSP value (m/s) at `pos` (vectorized N×3).
+| `plotTLSlice([bearingIdx])` | Plot a TL slice for a given bearing.
+| `plotTLPolar()` | Polar TL plot around the source. |
+| `plotEnvironment()` | Plot surface and seafloor meshes of the scene. |
+| `writeBellhopInputFiles()` | Regenerate `.env/.bty/.ssp` for current state. |
 
 ### Minimal Example
 ```matlab
@@ -36,12 +40,13 @@ params = uw.SimulationParameters.default();
 sim    = uw.Simulation(params);
 pos    = [0.5 0 20; 1 0 20];   % two receivers (km km m)
 TL     = sim.computeTL(pos);
-sim.visualizeEnvironment();
+sim.plotTLSlice();
 ```
 
 ---
 ## 2  `uw.SimulationParameters`
-Wrapper around a `containers.Map` storing *physical parameters*.
+Wrapper around a `containers.Map` storing physical and geometric parameters.
+Conventions: `source_x`,`source_y` in km; `source_depth` in m; `source_frequency` in Hz; `max_range_km` in km.
 
 Create defaults:
 ```matlab
@@ -54,10 +59,13 @@ Key API
 | `set(key,val)` / `get(key)` | Modify / read single parameter |
 | `update(values,names)` | Batch update (aligned arrays) |
 | `asArray(names)` | Convert subset to numeric vector |
+| `getMap()` | Copy of underlying `containers.Map` |
+| `hasParameter(name)` | Check existence |
+| `compareWith(other[,names])` | Differences for selected parameters |
 
 ---
 ## 3  `uw.SimSettings`
-Static container for scalar simulation settings (frequency, grids etc.). Normally accessed indirectly via `uw.Simulation`, but you can:
+Static container for scalar simulation settings (frequency, grids, file names, measurement options). Normally accessed indirectly via `uw.Simulation`, but you can:
 ```matlab
 s = uw.SimSettings.default();
 s.sim_frequency = 2000;   % customise
@@ -69,57 +77,16 @@ s.sim_frequency = 2000;   % customise
 |--------|------|
 | `uw.internal.ForwardModel.computeTL(simOrMap,pos)` | Thin wrapper around BELLHOP3D |
 | `uw.internal.writers.writeENV3D / writeBTY3D / writeSSP3D` | Emit input files |
-| `uw.internal.Visualization.drawEnvironment` | Shared plotting logic |
+| `uw.internal.Visualization.plotTLSlice / plotTLPolar / plotSSP` | Plotting helpers |
 
 ---
-## 5  Gaussian-Process SSP Modelling *(experimental)*
-`uw.gp_modeling.SSPGaussianProcess` generates 3-D GP realisations:
-```matlab
-gp   = uw.gp_modeling.SSPGaussianProcess('lengthScale',500);
-ssp  = gp.sampleField();          % Ny×Nx×Nz array
-params.set('ssp_grid', ssp);      % `.ssp` automatically written
-```
-Full Bayesian inversion demo planned for v0.4.
-
----
-## 6  Parameter-Estimation Utilities
-Located in `src/filtering` (to be namespaced). Key functions:
-| Function | Purpose |
-|----------|---------|
-| `step_ukf_filter()` | UKF prediction + update step |
-| `ukf()` | Full UKF cycle |
-| `unscented_transform()` | Core UT computation |
-
-Example forward-model handle inside UKF:
-```matlab
-fx = @(theta) sim.computeTL(theta2pos(theta));
-```
-
----
-## 7  Sensor-Placement (IPP)
-Entry point: `pos_next_measurement_sota(data,s)` – multi-algorithm selector.
-Algorithms: `rrt_star`, `random_points`, `multi_objective`, `tree_memoized`.
-
----
-## 8  Utility Functions
-| Utility | Description |
-|---------|-------------|
-| `startup()` | Add paths, verify BELLHOP |
-| `clean_files(pattern)` | Remove temporary BELLHOP files |
-
----
-## 9  Internal Flow Diagram
+## 5  Internal Flow Diagram
 ```mermaid
 graph TD;
   A[Simulation.computeTL] --> B[writeENV3D / writeBTY3D / writeSSP3D];
   B --> C[BELLHOP3D];
   C --> D[read_shd];
-  D --> E[Interpolate TL];
+  D --> E[Interpolate TL to Rx positions];
 ```
-
 ---
-## 10  Deprecated Symbols
-All standalone functions in `src/` are kept for research reproducibility but will be removed in the next major release. Use the namespaced API instead.
-
----
-*Generated April 2024 – UnderwaterModeling3D team.*
+*For any further question, reach out without esitation.*

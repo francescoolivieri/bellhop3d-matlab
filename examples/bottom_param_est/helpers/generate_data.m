@@ -7,6 +7,6 @@ idx=find(isfinite(data.x),1,'last');
 pos=[data.x(idx) data.y(idx) data.z(idx)];
 
 % Generate data
-data.m(idx) = data.sim_true.computeNoisyTL(pos);
+data.m(idx) = data.sim_true.computeTLWithNoise(pos);
 
 end

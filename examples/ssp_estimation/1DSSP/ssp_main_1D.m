@@ -7,11 +7,11 @@ clean_files();
 % Define estimate settings ------------------------------------------------
 
 sim = uw.Simulation();
-generateSSP3D(sim.settings);
+generateSSP1D(sim.settings);
 
 
 % Number of iterations
-N = 50;
+N = 3;
 
 % Note: mu/Sigma for ssp_grid, taken from CTD data
 data.th_names   = {'ssp_grid'};  % Parameters to estimate
@@ -39,28 +39,30 @@ data.z(1) = data.sim_est.settings.z_start;
 
 % SSP Estimator setup -----------------------------------------------------
 % Initialize GP model for estimation
-config.ell_h = 400;     % enforce horizontal constancy (1-D SSP)
-config.ell_v = 20;      % vertical correlation length (m)
-config.sigma_f = 2.0;   % Prior std dev of the SSP field (m/s)
+config.ell_h = +inf;     % enforce horizontal constancy (1-D SSP)
+config.ell_v = 50;      % vertical correlation length (m)
+config.sigma_f = 1.;   % Prior std dev of the SSP field (m/s)
 
 % Likelihood Noise
 config.tl_noise_std = 0.5; % measurement noise (matches computeTL without added noise)
 
 % MCMC Sample Parameters (pCN uses proposal_std as beta)
-config.mcmc_iterations = 50;
-config.mcmc_burn_in    = 3;
-config.proposal_std    = 0.01;   % pCN beta (target ~25-35% acceptance)
+config.mcmc_iterations = 80;
+config.mcmc_burn_in    = 5;
+config.proposal_std    = 0.5;   % pCN beta (target ~25-35% acceptance)
 
 
 % SSP Esimator Initialization ---------------------------------------------
 % Create an instance of the class.
-data.ssp_estimator = SSPGPMCMC_1D(config);  
+data.ssp_estimator = SSPGP_1D(config);  
 data.sim_est.params.set('ssp_grid', data.ssp_estimator.posterior_mean_ssp);
 
 
 pos_check = [0.5 1 20];
 before = data.sim_true.computeTL(pos_check);
 fprintf("BEGINNING TL at (%.2f %.2f %.2f) difference: %f \n", pos_check, sum(abs(before - data.sim_est.computeTL(pos_check)), 'all'));
+
+data.start_ssp  = data.ssp_estimator.posterior_mean_ssp;
 
 % Main estimation loop ----------------------------------------------------
 
@@ -73,10 +75,11 @@ for iter = 1:N
     current_pos = [data.x(idx), data.y(idx), data.z(idx)];
     
     % 2. Take measurement (simulate using true SSP)
-    measurement = data.sim_true.computeTL(current_pos);
+    tl_measurement = data.sim_true.computeTL(current_pos);
+    ssp_measurement = data.sim_true.sampleSoundSpeed(current_pos);
     
     % 3. Update GP with inversion (updates also simulation)
-    data.ssp_estimator.update(current_pos, measurement, data.sim_est);
+    data.ssp_estimator.update(current_pos, tl_measurement, data.sim_est, ssp_measurement);
 
     % Check status
     after = data.sim_est.computeTL(pos_check);
@@ -159,15 +162,27 @@ function plot_ssp_poster_summary(data, s, outpath)
     % pick center indices
     iy = round(size(true_ssp,1)/2); ix = round(size(true_ssp,2)/2);
     true_col = squeeze(true_ssp(iy, ix, :));
+    start_col = squeeze(data.start_ssp(iy, ix, :));
     est_col  = squeeze(est_ssp(iy, ix, :));
     std_col  = squeeze(unc_grid(iy, ix, :));
     % uncertainty band
-    fill([est_col-2*std_col; flipud(est_col+2*std_col)], [z_coords(:); flipud(z_coords(:))], [1 0.9 0.9], 'EdgeColor','none');
-    plot(est_col,  z_coords, 'r-', 'LineWidth', 2);
-    plot(true_col, z_coords, 'k--', 'LineWidth', 1.5);
-    set(ax3,'YDir','reverse'); grid(ax3,'on'); ylim([0 s.OceanDepth]);
-    xlabel('Sound speed (m/s)'); ylabel('Depth (m)'); title('SSP (center column) with 95% band');
-    legend({'±2σ band','Posterior mean','True'},'Location','best');
+    fill([est_col-2*std_col; flipud(est_col+2*std_col)], ...
+     [z_coords(:); flipud(z_coords(:))], ...
+     [1 0.9 0.9], 'EdgeColor','none');
+
+    plot(est_col,   z_coords, 'r-',  'LineWidth', 2);     % posterior mean
+    plot(start_col, z_coords, 'b-',  'LineWidth', 2);     % starting guess
+    plot(true_col,  z_coords, 'k--', 'LineWidth', 1.5);   % ground truth
+    
+    set(ax3,'YDir','reverse'); 
+    grid(ax3,'on'); 
+    ylim([0 s.OceanDepth]);
+    
+    xlabel('Sound speed (m/s)'); 
+    ylabel('Depth (m)'); 
+    title('SSP (center column) with 95% band');
+    
+    legend({'±2σ band','Posterior mean','Start','True'},'Location','best');
 
     % Panel 4: Posterior standard deviation vs depth (avg over x,y)
     ax4 = subplot(3,2,4);

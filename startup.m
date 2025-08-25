@@ -3,8 +3,7 @@ function startup()
     addpath('lib');  
     addpath(genpath('lib'));
     addpath('examples');
-    addpath(genpath('examples')); 
-    addpath('config');
+    addpath(genpath('examples'));
     addpath('data');    
 
     if exist('bellhop3d', 'file') ~= 2

@@ -1,8 +1,11 @@
-function scene = scenarioBuilder(s)
+function scene = buildScenario(s)
+% buildScenario  Procedurally generate a bathymetry and surface scene.
+%   SCENE = buildScenario(S) returns struct with fields X, Y, floor,
+%   surface based on options in S (see uw.SimSettings.default()).
 
 %% Define Water Surface and Ocean Environment
 % Create a water surface mesh
-[X, Y] = meshgrid(s.Ocean_x_min:s.Ocean_step:s.Ocean_x_max, s.Ocean_y_min:s.Ocean_step:s.Ocean_y_max);
+[X, Y] = meshgrid(s.Ocean_x_min:s.OceanGridStep:s.Ocean_x_max, s.Ocean_y_min:s.OceanGridStep:s.Ocean_y_max);
 waterSurface = zeros(size(X));
 
 % Add some gentle waves to the water surface
@@ -32,10 +35,10 @@ switch lower(s.OceanFloorType)
         % Define some terrain features manually
         % Each feature: [x_center_km, y_center_km, amplitude, sigma_km]        
         features = [
-             [0.5, 0.5, -5, 0.5]; % Central seamount (negative = hill)
-             [0, 1, -45, 0.5]; % Smaller seamount
-             [0, -0.5, -5, 0.5]; % Smaller seamount
-             [0, 0.5, 5, 0.5]; % Smaller seamount
+             [0.5, 0.5, -5, 0.5]; % seamount (negative = hill)
+             [0, 1, -20, 0.5]; % seamount
+             [0, -0.5, -5, 0.5]; %  seamount
+             [0, 0.5, 5, 0.5]; %  seamount
         ];
         
         for k = 1:size(features, 1)

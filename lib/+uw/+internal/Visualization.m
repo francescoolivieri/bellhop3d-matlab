@@ -2,7 +2,10 @@ classdef Visualization
     % VISUALIZATION  Internal helper functions for plotting environment and TL.
 
     methods (Static)
-        function fig = printSliceTL(sim, bearing_idx, varargin)
+        function fig = plotTLSlice(sim, bearing_idx, varargin)
+            % plotTLSlice  Plot TL slice for a given bearing index.
+            %   FIG = plotTLSlice(SIM, BEARING_IDX, 'ComputeBellhop', TF)
+            %   When ComputeBellhop is true, recomputes the .shd before plotting.
           
             p = inputParser;
             addParameter(p, 'ComputeBellhop', true, @islogical);
@@ -18,17 +21,22 @@ classdef Visualization
             plotshdPersonalised("Filename", sim.settings.filename + ".shd", "BearingIdx", bearing_idx);
         end
 
-        function printSSP3D()
+        function plotSSP(sim)
+            % plotSSP  Plot 3-D sound-speed profile using Bellhop tools.
+            %   plotSSP(SIM) uses plotssp3d when an .ssp exists,
+            %   otherwise plotssp on .env.
             figure; title('SSP Plot','FontSize',10);
 
-            if s.sim_use_ssp_file
-                plotssp3d(s.filename + ".ssp");
+            if isfile(sim.settings.filename + ".ssp")
+                plotssp3d(sim.settings.filename + ".ssp");
             else
-                plotssp(s.filename + ".env");
+                plotssp(sim.settings.filename + ".env");
             end
         end
 
-        function printPolarTL(sim, varargin)
+        function plotTLPolar(sim, varargin)
+            % plotTLPolar  Polar TL plot around the source.
+            %   plotTLPolar(SIM, 'ComputeBellhop', TF)
             p = inputParser;
             addParameter(p, 'ComputeBellhop', true, @islogical);
             parse(p, varargin{:});
@@ -46,6 +54,7 @@ classdef Visualization
         end
 
         function printBTY(sim)
+            % printBTY  Plot bathymetry (.bty) if in use.
             if sim.settings.sim_use_bty_file
                 figure; title('Bathymetry (BTY)'); plotbdry3d(sim.settings.filename + ".bty");
             else

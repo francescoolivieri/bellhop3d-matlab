@@ -1,6 +1,7 @@
 function writeENV3D(filename, s, map)
-% WRITEENV3D  Create a Bellhop3-D environment (.env) file.
-%   Namespaced version of the original writer located at lib/writers/writeENV3D.m.
+% WRITEENV3D  Create a Bellhop-3D environment (.env) file.
+%   WRITEENV3D(FILENAME, S, MAP) writes the .env using settings S and
+%   parameter map MAP (containers.Map). Internal helper.
 
 fid = fopen(filename, 'w');
 if fid == -1
@@ -44,7 +45,7 @@ fprintf(fid, '1                 ! NSy\n%.2f /             ! y (km)\n', map('sour
 fprintf(fid, '1                 ! NSz\n%.2f /          ! Sz (m)\n', map('source_depth'));
 
 fprintf(fid, '200               ! NRz\n0 %.2f /          ! Rz range (m)\n', s.sim_max_depth);
-fprintf(fid, '1000              ! NRr\n0.0  %.2f /      ! Rr (km)\n', s.sim_range);
+fprintf(fid, '1000              ! NRr\n0.0  %.2f /      ! Rr (km)\n', s.sim_max_range);
 fprintf(fid, '%d                 ! Ntheta\n0.0 360.0 /         ! bearings\n', s.sim_num_bearings);
 
 % Computational options -----------------------------------------------------

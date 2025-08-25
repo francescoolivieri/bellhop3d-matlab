@@ -256,8 +256,8 @@ classdef SSPGaussianProcessMCMC < handle
         function setupPredictionGrid(obj)
             % Setup 3D prediction grid based on simulation settings
             s = uw.SimSettings.default();
-            obj.grid_x = s.Ocean_x_min:s.Ocean_step:s.Ocean_x_max;
-            obj.grid_y = s.Ocean_y_min:s.Ocean_step:s.Ocean_y_max;
+            obj.grid_x = s.Ocean_x_min:s.OceanGridStep:s.Ocean_x_max;
+            obj.grid_y = s.Ocean_y_min:s.OceanGridStep:s.Ocean_y_max;
             obj.grid_z = 0:s.Ocean_z_step:s.sim_max_depth;
             [X, Y, Z] = meshgrid(obj.grid_x, obj.grid_y, obj.grid_z);
             obj.X_grid = [X(:), Y(:), Z(:)];

@@ -196,7 +196,7 @@ function new_pos = extend_toward_point(from_pos, to_pos, step_size, s)
     if sqrt(new_pos(1)^2 + new_pos(2)^2) > s.x_max 
         v = [new_pos(1)-s.sim_source_x, new_pos(2)-s.sim_source_y];
         v_unit = v / norm(v);
-        q = [s.sim_source_x, s.sim_source_y] + s.sim_range * v_unit;
+        q = [s.sim_source_x, s.sim_source_y] + s.sim_max_range * v_unit;
 
         new_pos(1) = q(1);
         new_pos(2) = q(2);

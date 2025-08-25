@@ -1,21 +1,17 @@
 classdef SimulationParameters < handle
-    % SIMULATIONPARAMETERS  Parameter container for Bellhop3-D simulations.
+    % SIMULATIONPARAMETERS  Parameter container for Bellhop-3D simulations.
     %
-    %   This class provides the same functionality that "ParameterMap" used
-    %   to offer, but is now namespaced inside the "uw" MATLAB package so it
-    %   can serve as the public interface of the upcoming Bellhop3-D
-    %   abstraction library.
-    %
-    %   Most existing code that relied on ParameterMap will continue to work
-    %   if it uses the compatibility wrapper (see old ParameterMap.m).  New
-    %   code should create parameters via:
-    %
+    %   Create defaults and customise:
     %       params = uw.SimulationParameters.default();
+    %       params.set('sound_speed_water', 1490);
+    %       v = params.get('sound_speed_water');
     %
-    %   or
-    %       params = uw.SimulationParameters(struct_with_fields);
+    %   Common keys: 'sound_speed_water', 'sound_speed_sediment',
+    %   'density_sediment', 'attenuation_sediment', 'ssp_grid',
+    %   'source_frequency', 'source_x', 'source_y', 'source_depth', 'max_range_km'.
     %
-    %   See the detailed help for available methods.
+    %   Use update()/asArray() for batch ops and getMap() to obtain a
+    %   containers.Map for internal writers or the forward model.
     % ---------------------------------------------------------------------
 
     properties (Access = private)
@@ -56,17 +52,17 @@ classdef SimulationParameters < handle
 
                 % 3-D sound-speed profile grid (initialised as NaNs)
                 obj.param_map('ssp_grid') = nan( ...
-                    length(initial_params.Ocean_y_min:initial_params.Ocean_step:initial_params.Ocean_y_max), ...
-                    length(initial_params.Ocean_x_min:initial_params.Ocean_step:initial_params.Ocean_x_max), ...
+                    length(initial_params.Ocean_y_min:initial_params.OceanGridStep:initial_params.Ocean_y_max), ...
+                    length(initial_params.Ocean_x_min:initial_params.OceanGridStep:initial_params.Ocean_x_max), ...
                     length(0:initial_params.Ocean_z_step:initial_params.sim_max_depth));
 
                 % Geometric parameters
-                obj.param_map('source_frequency') = initial_params.sim_source_frequency;  % m
+                obj.param_map('source_frequency') = initial_params.sim_source_frequency;  % Hz
                 obj.param_map('water_depth') = initial_params.sim_max_depth;  % m
-                obj.param_map('source_x') = initial_params.sim_source_x; % m
-                obj.param_map('source_y') = initial_params.sim_source_y; % m
+                obj.param_map('source_x') = initial_params.sim_source_x; % km
+                obj.param_map('source_y') = initial_params.sim_source_y; % km
                 obj.param_map('source_depth') = initial_params.sim_source_depth; % m
-                obj.param_map('range')        = initial_params.sim_range;        % km or m ? (kept as-is)
+                
             end
 
             % Estimation names -------------------------------------------------
@@ -82,6 +78,8 @@ classdef SimulationParameters < handle
         end
 
         function value = get(obj, name)
+            % get  Read parameter by name.
+            %   VAL = get(OBJ, NAME) or VAL = obj.get(NAME)
             if obj.param_map.isKey(name)
                 value = obj.param_map(name);
             else
@@ -90,6 +88,8 @@ classdef SimulationParameters < handle
         end
 
         function set(obj, name, value)
+            % set  Set parameter value by name.
+            %   set(OBJ, NAME, VAL) or obj.set(NAME, VAL)
             obj.param_map(name) = value;
 
             if obj.isSedimentParameter(name)
@@ -98,6 +98,8 @@ classdef SimulationParameters < handle
         end
 
         function arr = asArray(obj, names)
+            % asArray  Convert selected parameters to a numeric vector.
+            %   ARR = asArray(OBJ, NAMES) or ARR = obj.asArray(NAMES)
             if nargin < 2
                 names = obj.estimation_param_names;
             end
@@ -107,6 +109,7 @@ classdef SimulationParameters < handle
         function update(obj, values, names)
             % Faster than using the set method
             % If no name provided, it updates the estimates
+            %   update(OBJ, VALUES, NAMES) or obj.update(VALUES, NAMES)
 
             if nargin < 3
                 names = obj.estimation_param_names;
@@ -128,14 +131,17 @@ classdef SimulationParameters < handle
         end
 
         function map = getMap(obj)
+            % getMap  Return a copy of the underlying containers.Map.
             map = containers.Map(obj.param_map.keys, obj.param_map.values);
         end
 
         function tf = hasParameter(obj, name)
+            % hasParameter  True if NAME exists in the map.
             tf = obj.param_map.isKey(name);
         end
 
         function copyFrom(obj, other)
+            % copyFrom  Copy all parameters from another instance or a map.
             if isa(other, 'uw.SimulationParameters')
                 src = other.getMap();
             else
@@ -148,16 +154,20 @@ classdef SimulationParameters < handle
         end
 
         function applySedimentPadding(obj, default_param_map)
+            % applySedimentPadding  Pad sediment vectors to equal length.
             obj.param_map = paddingSedimentParams(obj.param_map, default_param_map);
         end
 
         function print(obj, titleStr)
+            % print  Pretty-print keys and values to the console.
             if nargin < 2, titleStr = 'Simulation Parameters'; end
             fprintf('\n=== %s ===\n', titleStr);
             disp(table(obj.param_map.keys', obj.param_map.values', 'VariableNames', {'Key', 'Value'}));
         end
 
         function diff = compareWith(obj, other, names)
+            % compareWith  Differences between this and OTHER for selected names.
+            %   DIFF = compareWith(OBJ, OTHER, NAMES) or DIFF = obj.compareWith(OTHER, NAMES)
             if nargin < 3
                 names = obj.estimation_param_names;
             end
@@ -175,10 +185,12 @@ classdef SimulationParameters < handle
         end
 
         function setEstimationParameterNames(obj, names)
+            % setEstimationParameterNames  Define ordered list for estimation.
             obj.estimation_param_names = names;
         end
 
         function names = getEstimationParameterNames(obj)
+            % getEstimationParameterNames  Return estimation parameter names.
             names = obj.estimation_param_names;
         end
 
@@ -243,8 +255,8 @@ classdef SimulationParameters < handle
                     info.ylabel = 'Depth (m)';
                     info.unit   = 'm';
     
-                case 'range'
-                    info.title  = 'Range';
+                case 'max_range_km'
+                    info.title  = 'max_range_km';
                     info.ylabel = 'Distance (m)';
                     info.unit   = 'm';
     

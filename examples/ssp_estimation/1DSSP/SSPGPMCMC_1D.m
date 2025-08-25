@@ -1,4 +1,4 @@
-classdef SSPGPMCMC_1D < handle
+classdef SSPGP_1D < handle
     % SSPGaussianProcessMCMC - Gaussian Process for 3D Sound Speed Profile
     % estimation using Markov Chain Monte Carlo (MCMC) methods.
     %
@@ -45,10 +45,18 @@ classdef SSPGPMCMC_1D < handle
         K_prior         % Prior covariance matrix for the grid
         K_prior_chol    % Cholesky decomposition of the prior covariance
         mu_prior_grid   % Prior mean on the grid
+        % Conditioned (two-stage) prior quantities
+        K_cond_chol     % Cholesky of conditioned covariance (after SSP obs)
+        mu_cond_grid    % Conditioned mean on the grid (after SSP obs)
+        use_conditioned_prior logical = false
+        % Stored SSP observations (optional)
+        ssp_obs_pos     % [Ns x 3] positions (x,y in km, z in m)
+        ssp_obs_val     % [Ns x 1] sound speed measurements (m/s)
+        ssp_obs_noise_std (1,1) double = 0.5
     end
 
     methods
-        function obj = SSPGPMCMC_1D(config)
+        function obj = new_SSPGPMCMC_1D(config)
             % Constructor
             % Input: config struct with fields:
             %   - ell_h, ell_v, sigma_f: GP hyperparameters
@@ -77,31 +85,51 @@ classdef SSPGPMCMC_1D < handle
             obj.computePriorCovariance();
             
             % Initialize the posterior with the prior
-            obj.posterior_mean_ssp = reshape(obj.mu_prior_grid, [length(obj.grid_y), length(obj.grid_x), length(obj.grid_z)]);
+            obj.posterior_mean_ssp = reshape(obj.mu_prior_grid, [length(obj.grid_x), length(obj.grid_y), length(obj.grid_z)]);
             obj.posterior_var_ssp = obj.sigma_f^2 * ones(size(obj.posterior_mean_ssp));
 
             fprintf('Initialization complete.\n');
         end
 
-        function update(obj, new_pos, new_tl_measurement, sim)
-            % Update the SSP estimate with a new TL measurement using MCMC.
+        function update(obj, new_pos, new_tl_measurement, sim, ssp_value, ssp_noise_std)
+            % Update the SSP estimate with new TL and optional direct SSP measurement.
             % This is a computationally intensive operation.
             %
             % Inputs:
             %   new_pos: [1 x 3] receiver position for the new measurement
             %   new_tl_measurement: scalar TL value (dB)
             %   sim: The Simulation object we are performing the SSP update on
+            %   ssp_value (optional): scalar SSP (m/s) measured at new_pos
+            %   ssp_noise_std (optional): std dev (m/s) for SSP measurement noise
 
             fprintf('\n--- Starting MCMC Update ---\n');
-            fprintf('New measurement at [%.1f, %.1f, %.1f]: %.1f dB\n', new_pos, new_tl_measurement);
+            fprintf('New TL at [%.1f, %.1f, %.1f]: %.1f dB\n', new_pos, new_tl_measurement);
 
             % Add new data to the observation set
             obj.X_obs = [obj.X_obs; new_pos];
             obj.tl_obs = [obj.tl_obs; new_tl_measurement];
 
+            % If an SSP point measurement is provided, condition the GP prior
+            if nargin >= 5 && ~isempty(ssp_value)
+                if nargin >= 6 && ~isempty(ssp_noise_std)
+                    obj.ssp_obs_noise_std = ssp_noise_std;
+                end
+                % Initialize containers if empty
+                if isempty(obj.ssp_obs_pos), obj.ssp_obs_pos = zeros(0,3); end
+                if isempty(obj.ssp_obs_val), obj.ssp_obs_val = zeros(0,1); end
+                obj.ssp_obs_pos = [obj.ssp_obs_pos; new_pos];
+                obj.ssp_obs_val = [obj.ssp_obs_val; ssp_value];
+                obj.conditionOnSSPObservations();
+                fprintf('Conditioned GP on %d SSP obs (noise std = %.3f m/s).\n', size(obj.ssp_obs_pos,1), obj.ssp_obs_noise_std);
+            end
+
             % --- MCMC Initialization ---
             % Start the chain from the current posterior mean
-            current_ssp_flat = obj.posterior_mean_ssp(:);
+            if obj.use_conditioned_prior && ~isempty(obj.mu_cond_grid)
+                current_ssp_flat = obj.mu_cond_grid(:);
+            else
+                current_ssp_flat = obj.posterior_mean_ssp(:);
+            end
             
             % Calculate the log posterior for the starting point
             %log_post_current = obj.calculate_log_posterior(current_ssp_flat, sim);
@@ -109,17 +137,26 @@ classdef SSPGPMCMC_1D < handle
             obj.ssp_samples = cell(1, obj.mcmc_iterations);
             accepted_count = 0;
 
-            fprintf('Running Metropolis-Hastings sampler for %d iterations...\n', obj.mcmc_iterations);
+            fprintf('Running pCN sampler for %d iterations...\n', obj.mcmc_iterations);
             
             % --- pCN Sampler Loop (dimension-robust) ---
             beta = min(0.5, max(0.01, obj.proposal_std));
             % Start with current likelihood value
             log_like_current = obj.calculate_log_likelihood(current_ssp_flat, sim);
             for i = 1:obj.mcmc_iterations
-                % Draw from the GP prior using the Cholesky factor
-                eta = obj.K_prior_chol' * randn(size(current_ssp_flat));
-                % pCN proposal preserves the GP prior
-                proposed_ssp_flat = sqrt(1 - beta^2) * current_ssp_flat + beta * eta;
+                % Draw from the (possibly conditioned) prior using the Cholesky factor
+                if obj.use_conditioned_prior && ~isempty(obj.K_cond_chol)
+                    L = obj.K_cond_chol;
+                    mu0 = obj.mu_cond_grid(:);
+                else
+                    L = obj.K_prior_chol;
+                    mu0 = obj.mu_prior_grid(:);
+                end
+                eta = L' * randn(size(current_ssp_flat));
+                % Centered pCN around mu0: operate on u = x - mu0
+                u = current_ssp_flat - mu0;
+                u_prop = sqrt(1 - beta^2) * u + beta * eta;
+                proposed_ssp_flat = mu0 + u_prop;
 
                 % Likelihood-only acceptance ratio
                 log_like_proposed = obj.calculate_log_likelihood(proposed_ssp_flat, sim);
@@ -156,7 +193,7 @@ classdef SSPGPMCMC_1D < handle
             
             if isempty(obj.ssp_samples) || length(obj.ssp_samples) <= obj.mcmc_burn_in
                 warning('Not enough samples to update posterior. Using prior.');
-                obj.posterior_mean_ssp = reshape(obj.mu_prior_grid, [length(obj.grid_y), length(obj.grid_x), length(obj.grid_z)]);
+                obj.posterior_mean_ssp = reshape(obj.mu_prior_grid, [length(obj.grid_x), length(obj.grid_y), length(obj.grid_z)]);
                 return;
             end
             
@@ -168,7 +205,7 @@ classdef SSPGPMCMC_1D < handle
             mean_ssp_flat = mean(valid_samples_matrix, 2);
             var_ssp_flat = var(valid_samples_matrix, 0, 2);
             
-            grid_dims = [length(obj.grid_y), length(obj.grid_x), length(obj.grid_z)];
+            grid_dims = [length(obj.grid_x), length(obj.grid_y), length(obj.grid_z)];
             obj.posterior_mean_ssp = reshape(mean_ssp_flat, grid_dims);
             obj.posterior_var_ssp = reshape(var_ssp_flat, grid_dims);
         end
@@ -199,7 +236,7 @@ classdef SSPGPMCMC_1D < handle
             
             try
                 % --- Run the Forward Acoustic Model ---
-                ssp_grid = reshape(ssp_flat, [length(obj.grid_y), length(obj.grid_x), length(obj.grid_z)]);
+                ssp_grid = reshape(ssp_flat, [length(obj.grid_x), length(obj.grid_y), length(obj.grid_z)]);
                 
                 % Assign ssp field
                 sim.params.set('ssp_grid', ssp_grid);
@@ -238,6 +275,17 @@ classdef SSPGPMCMC_1D < handle
     end
     
     methods (Access = private)
+        function [K_xx, K_xs, K_ss] = kernelBlocks(obj, X_grid, X_obs)
+            % Helper to compute kernel blocks for conditioning
+            K_xx = obj.kernelMatrix(X_grid, X_grid);
+            if nargin > 2 && ~isempty(X_obs)
+                K_xs = obj.kernelMatrix(X_grid, X_obs);
+                K_ss = obj.kernelMatrix(X_obs, X_obs);
+            else
+                K_xs = [];
+                K_ss = [];
+            end
+        end
         function setupMeanFunction(obj)
             % Setup mean function from CTD data
             try
@@ -256,8 +304,8 @@ classdef SSPGPMCMC_1D < handle
         function setupPredictionGrid(obj)
             % Setup 3D prediction grid based on simulation settings
             s = uw.SimSettings.default();
-            obj.grid_x = s.Ocean_x_min:s.Ocean_step:s.Ocean_x_max;
-            obj.grid_y = s.Ocean_y_min:s.Ocean_step:s.Ocean_y_max;
+            obj.grid_x = s.Ocean_x_min:s.OceanGridStep:s.Ocean_x_max;
+            obj.grid_y = s.Ocean_y_min:s.OceanGridStep:s.Ocean_y_max;
             obj.grid_z = 0:s.Ocean_z_step:s.sim_max_depth;
             [X, Y, Z] = meshgrid(obj.grid_x, obj.grid_y, obj.grid_z);
             obj.X_grid = [X(:), Y(:), Z(:)];
@@ -291,6 +339,42 @@ classdef SSPGPMCMC_1D < handle
             r2_v = dz.^2;
             
             K = obj.sigma_f^2 * exp(-0.5 * r2_h / obj.ell_h^2 - 0.5 * r2_v / obj.ell_v^2);
+        end
+        
+        function conditionOnSSPObservations(obj)
+            % Apply GP conditioning on available SSP point observations.
+            if isempty(obj.ssp_obs_pos) || isempty(obj.ssp_obs_val)
+                obj.use_conditioned_prior = false;
+                return;
+            end
+
+            Xs = obj.ssp_obs_pos;          % [Ns x 3]
+            ys = obj.ssp_obs_val(:);       % [Ns x 1]
+
+            % Kernel blocks
+            [K_xx, K_xs, K_ss] = obj.kernelBlocks(obj.X_grid, Xs);
+
+            % Observation noise
+            R = (obj.ssp_obs_noise_std^2) * eye(size(K_ss,1));
+
+            % Prior mean at obs
+            mu_s = obj.mean_func(Xs(:,3));
+
+            % Conditioned mean/covariance on grid
+            % Use linear solver for stability: (K_ss + R) \ v
+            A = K_ss + R;
+            w = A \ (ys - mu_s);
+            mu_cond = obj.mean_func(obj.X_grid(:,3)) + K_xs * w;
+
+            V = A \ K_xs';
+            K_cond = K_xx - K_xs * V;
+            K_cond = (K_cond + K_cond') * 0.5;  % symmetrize
+            K_cond = K_cond + 1e-6 * eye(size(K_cond,1));
+
+            % Store
+            obj.mu_cond_grid = mu_cond;
+            obj.K_cond_chol  = chol(K_cond, 'lower');
+            obj.use_conditioned_prior = true;
         end
     end
 end
