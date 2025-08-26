@@ -19,14 +19,16 @@ Note: the library was developed using the linux version of Bellhop-3D.
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/francescoolivieri/Bellhop3D_Matlab_Abstraction_Library.git,
-   cd Bellhop3D_Matlab_Abstraction_Library
+   git clone https://github.com/francescoolivieri/bellhop3d-matlab.git,
+   cd bellhop3d-matlab
    ```
 2. **Install BELLHOP3D** and add it to your MATLAB path
    ```matlab
    addpath('/path/to/bellhop');   % adjust as needed
    ```
-3. **Start MATLAB and initialise**
+
+   Bellhop library can be found at: https://patel999jay.github.io/post/bellhop-acoustic-toolbox/
+3. **Start MATLAB, select folder and initialise**
    ```matlab
    startup          % adds lib/ to path and checks BELLHOP
    ```
