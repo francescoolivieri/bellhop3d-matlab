@@ -1,6 +1,8 @@
 # 🌊 Bellhop-3D MATLAB Abstraction Library
 
-UnderwaterModeling3D wraps the FORTRAN-based **BELLHOP3D** acoustic toolbox in a object-oriented MATLAB package (`+uw`).  It contains some examples of applications: **bottom-parameter and sound-speed-profile (SSP) estimation**, **informative path planning (IPP)** but can be used for general 3-D underwater propagation studies.
+Bellhop3d-matlab wraps **BELLHOP3D** acoustic toolbox in a object-oriented MATLAB package (`+uw`).  It contains some examples of applications: **bottom-parameter and sound-speed-profile (SSP) estimation**, **informative path planning (IPP)** but can be used for general 3-D underwater propagation studies.
+
+Note: the library was developed using the linux version of Bellhop-3D.
 
 ---
 ## ✨ Key Features
