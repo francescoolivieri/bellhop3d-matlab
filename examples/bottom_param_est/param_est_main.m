@@ -6,7 +6,7 @@ clean_files();
 % Define estimate settings ------------------------------------------------
 
 % Number of iterations
-N = 4;
+N = 8;
 
 % Note: names and according values must be in the SAME order
 data.th_names   = {'sound_speed_sediment'};  % Parameters to estimate
@@ -15,7 +15,7 @@ data.Sigma_est = diag([20].^2);     % Prior covariances
 data.Sigma_rr       = 1^2;              % Filter assumed noise var
 
 % Pick ground truth from the prob. distribution
-data.th = data.th_est + chol(data.Sigma_est,'lower')*randn(size(data.th_est));
+data.th = 1620.;%  data.th_est + chol(data.Sigma_est,'lower')*randn(size(data.th_est));
 
 % Setup the two environments ----------------------------------------------
 % True world
