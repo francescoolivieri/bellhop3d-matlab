@@ -19,8 +19,8 @@ Note: the library was developed using the linux version of Bellhop-3D.
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/francescoolivieri/Bellhop3D_Matlab_Abstraction_Library.git,
-   cd Bellhop3D_Matlab_Abstraction_Library
+   git clone https://github.com/francescoolivieri/bellhop3d-matlab.git,
+   cd bellhop3d-matlab
    ```
 2. **Install BELLHOP3D** and add it to your MATLAB path
    ```matlab
@@ -108,11 +108,11 @@ Run any example after `startup` – they automatically add `lib` to the path.
 
 If you use this library, cite as:
 ```bibtex
-@software{underwater_modeling_3d,
-  title        = {UnderwaterModeling3D: Bellhop-3D MATLAB Abstraction Library},
+@software{bellhop3d-matlab,
+  title        = {bellhop3d-matlab: Bellhop-3D MATLAB Abstraction Library},
   author       = {Francesco Olivieri},
   year         = {2025},
-  url          = {https://github.com/francescoolivieri/Bellhop3D_Matlab_Abstraction_Library.git},
+  url          = {https://github.com/francescoolivieri/bellhop3d-matlab.git},
   note         = {3-D acoustic propagation, Bayesian estimation, sensor planning}
 }
 ```
