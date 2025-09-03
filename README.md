@@ -110,11 +110,11 @@ Run any example after `startup` – they automatically add `lib` to the path.
 
 If you use this library, cite as:
 ```bibtex
-@software{underwater_modeling_3d,
-  title        = {UnderwaterModeling3D: Bellhop-3D MATLAB Abstraction Library},
+@software{bellhop3d-matlab,
+  title        = {bellhop3d-matlab: Bellhop-3D MATLAB Abstraction Library},
   author       = {Francesco Olivieri},
   year         = {2025},
-  url          = {https://github.com/francescoolivieri/Bellhop3D_Matlab_Abstraction_Library.git},
+  url          = {https://github.com/francescoolivieri/bellhop3d-matlab.git},
   note         = {3-D acoustic propagation, Bayesian estimation, sensor planning}
 }
 ```

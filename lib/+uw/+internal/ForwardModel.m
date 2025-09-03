@@ -52,7 +52,7 @@ classdef ForwardModel
             bellhop3d(s.filename);
 
             % Read SHD
-            [~, ~, ~, ~, ~, Pos, pressure] = read_shd(s.filename + ".shd");
+            [~, ~, ~, ~, ~, Pos, pressure] = read_shd(char(s.filename+".shd"));
             num_bearings = length(Pos.theta);
             [rGrid, zGrid] = meshgrid(Pos.r.r, Pos.r.z);
 

@@ -42,7 +42,7 @@ classdef SimSettings
 
             %% External file references
             s.sim_id = sprintf('%07d', randi([0,9999999]));  % id simulation
-            s.filename  = ['sim_env' '_' s.sim_id];          % base filename
+            s.filename  = char("sim_env" + "_" + s.sim_id);          % base filename
 
             %% Measurements Settings
             s.z_min = 0;              s.z_max = s.sim_max_depth;
@@ -55,7 +55,7 @@ classdef SimSettings
 
             %% Measurement grid
             s.d_z = 10;    s.d_x = 0.3;  s.d_y = 0.3;           % mesurement step sizes
-            s.z_start = 0; s.x_start = 0.5; s.y_start = 0.5;    % mesurement starting point
+            s.z_start = 15; s.x_start = 0.5; s.y_start = 0.5;    % mesurement starting point
             s.tree_depth  = 1;                                  % planning tree depth
             
             s.sigma_tl_noise = 1;                               % measurement noise (dB)
