@@ -18,6 +18,8 @@ classdef Simulation < handle
         scene                          % struct with X, Y, floor fields
         settings                        % struct (legacy) used by writers
         units   (1,1) string = "km"     % distance units for x/y ("km" or "m")
+        sensor   uw.Sensor               % primary sensor handle
+        sensors  uw.Sensor               % array of sensors
     end
 
     methods
@@ -55,28 +57,53 @@ classdef Simulation < handle
             
             uw.internal.writers.writeENV3D(obj.settings.filename + ".env", obj.settings, obj.params.getMap()); 
 
+            % Default sensor ---------------------------------------------
+            startPos = [obj.settings.x_start, obj.settings.y_start, obj.settings.z_start];
+            obj.sensor = uw.Sensor("receiver", startPos, obj.settings);
+            obj.sensor.units = obj.units;
+            obj.sensor.sim = obj;
+            obj.sensors = obj.sensor;
+
         end
 
-        function tl = computeTL(obj, receiverPos)
-            % computeTL  Transmission loss at receiver positions.
+        function tl = computeTL(obj, receiverPos, varargin)
+            % computeTL  Transmission loss at positions.
             %   TL = sim.computeTL(RX_POS)
+            %   TL = sim.computeTL()                % at primary sensor
+            %   TL = sim.computeTL("all")          % at all sensors' positions
+            %
             %   RX_POS is N×3 [x y z] with x,y in km (if OBJ.units=="km") and z in m.
             %   Returns TL (dB) as an N×1 vector.
-            arguments
-                obj
-                receiverPos (:,3) double {mustBeFinite}
+
+            if nargin < 2 || isempty(receiverPos)
+                receiverPos = obj.collectSensorPositions(false);
+            elseif ischar(receiverPos) || isstring(receiverPos)
+                if strcmpi(string(receiverPos), "all")
+                    receiverPos = obj.collectSensorPositions(true);
+                else
+                    error('Simulation:computeTL', 'Unrecognised option: %s', string(receiverPos));
+                end
             end
+
             tl = uw.internal.ForwardModel.computeTL(obj, receiverPos);
         end
 
         function ssp_rcv = sampleSoundSpeed(obj, receiverPos)
-            % sampleSoundSpeed  Interpolate SSP at a receiver position.
-            %   C = sim.sampleSoundSpeed( RX_POS )
+            % sampleSoundSpeed  Interpolate SSP at positions.
+            %   C = sim.sampleSoundSpeed(RX_POS)
+            %   C = sim.sampleSoundSpeed()        % at primary sensor
+            %   C = sim.sampleSoundSpeed("all")  % at all sensors' positions
             %   RX_POS is N×3 [x y z] with x,y in km (if OBJ.units=="km") and z in m.
             %   Returns sound speed (m/s) at RX_POS by trilinear interpolation.
-            arguments
-                obj
-                receiverPos (:,3) double {mustBeFinite}
+
+            if nargin < 2 || isempty(receiverPos)
+                receiverPos = obj.collectSensorPositions(false);
+            elseif ischar(receiverPos) || isstring(receiverPos)
+                if strcmpi(string(receiverPos), "all")
+                    receiverPos = obj.collectSensorPositions(true);
+                else
+                    error('Simulation:sampleSoundSpeed', 'Unrecognised option: %s', string(receiverPos));
+                end
             end
             % Build SSP grid coordinates from settings
             % x,y in km; z in m
@@ -97,14 +124,26 @@ classdef Simulation < handle
 
         function tl = computeTLWithNoise(obj, receiverPos, tl_noise)
             % computeTLWithNoise  TL with additive Gaussian noise.
-            %   TL = computeTLWithNoise(OBJ, POS, SIGMA) or TL = sim.computeTLWithNoise(POS, SIGMA)
+            %   TL = sim.computeTLWithNoise(POS[, SIGMA])
+            %   TL = sim.computeTLWithNoise()           % at primary sensor
+            %   TL = sim.computeTLWithNoise("all")     % at all sensors
             %   SIGMA is the TL noise st.dev. in dB (default from settings).
             %   Returns TL (dB) as N×1 with noise added.
-            arguments
-                obj
-                receiverPos (:,3) double {mustBeFinite}
-                tl_noise (1,1) double {mustBeFinite} = obj.settings.sigma_tl_noise
+
+            if nargin < 2 || isempty(receiverPos)
+                receiverPos = obj.collectSensorPositions(false);
+            elseif ischar(receiverPos) || isstring(receiverPos)
+                if strcmpi(string(receiverPos), "all")
+                    receiverPos = obj.collectSensorPositions(true);
+                else
+                    error('Simulation:computeTLWithNoise', 'Unrecognised option: %s', string(receiverPos));
+                end
             end
+
+            if nargin < 3 || isempty(tl_noise)
+                tl_noise = obj.settings.sigma_tl_noise;
+            end
+
             % Compute TL and add Gaussian noise
             tl = uw.internal.ForwardModel.computeTL(obj, receiverPos) + tl_noise*randn;
         end
@@ -172,6 +211,70 @@ classdef Simulation < handle
             pause(0.05);
         end
 
-        
+        function addSensor(obj, sensor)
+            % addSensor  Add a sensor to the simulation.
+            arguments
+                obj
+                sensor (1,1) uw.Sensor
+            end
+            if isempty(obj.sensors)
+                obj.sensors = sensor;
+            else
+                obj.sensors(end+1) = sensor;
+            end
+            if isempty(obj.sensor)
+                obj.sensor = sensor;
+            end
+            sensor.sim = obj;
+        end
+
+        function removeSensor(obj, idx)
+            % removeSensor  Remove sensor by index.
+            arguments
+                obj
+                idx (1,1) double {mustBeInteger, mustBePositive}
+            end
+            if idx <= numel(obj.sensors)
+                obj.sensors(idx) = [];
+            end
+            if ~isempty(obj.sensor) && (idx > numel(obj.sensors))
+                % if primary was removed or index out-of-range, reset primary
+                if isempty(obj.sensors)
+                    obj.sensor = uw.Sensor("receiver", [obj.settings.x_start, obj.settings.y_start, obj.settings.z_start], obj.settings);
+                else
+                    obj.sensor = obj.sensors(1);
+                end
+            end
+        end
+
+        function s = getSensor(obj, idx)
+            % getSensor  Return sensor by index (default: primary).
+            if nargin < 2
+                s = obj.sensor;
+            else
+                s = obj.sensors(idx);
+            end
+        end
+
+    end
+
+    methods (Access = private)
+        function receiverPos = collectSensorPositions(obj, includeAll)
+            % collectSensorPositions  Helper to gather sensor positions.
+            if nargin < 2, includeAll = false; end
+            if includeAll
+                if isempty(obj.sensors)
+                    receiverPos = obj.sensor.pos;
+                else
+                    count = numel(obj.sensors);
+                    receiverPos = nan(count, 3);
+                    for i = 1:count
+                        receiverPos(i, :) = obj.sensors(i).pos;
+                    end
+                end
+            else
+                receiverPos = obj.sensor.pos;
+            end
+        end
     end
 end

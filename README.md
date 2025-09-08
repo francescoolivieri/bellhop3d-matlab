@@ -50,6 +50,21 @@ sim.plotTLSlice();
 > **Tip** `uw.Simulation` accepts a custom `scene` struct (fields `X`, `Y`, `floor`) if you want non-default bathymetry (`uw.SimSettings` has option to choose between flat, curves, gaussian features or fractal).
 
 ---
+## 🧭 Sensors & Motion Planning
+
+`uw.Sensor` represents a movable agent/receiver. A default sensor is created for each simulation.
+
+```matlab
+sim = uw.Simulation();
+sim.sensor.move([1.0 0.2 30]);      % absolute move
+sim.sensor.setStrategy("lawnmower");% configure once
+sim.sensor.step();                  % advance one step
+sim.sensor.lawnmower();             % use directly the function to perform the step
+```
+
+More strategies with name‑value parameters (e.g., `treeSearch("depth", 2, state)`), `setStrategy`/`step`, multi‑sensor usage, and custom extensions are in `docs/API_REFERENCE.md`.
+
+---
 ## 🔬 Scientific Workflows
 
 ### 1  Bottom-Parameter Estimation (UKF)

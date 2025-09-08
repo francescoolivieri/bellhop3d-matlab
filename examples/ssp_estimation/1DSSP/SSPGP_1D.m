@@ -56,7 +56,7 @@ classdef SSPGP_1D < handle
     end
 
     methods
-        function obj = new_SSPGPMCMC_1D(config)
+        function obj = SSPGP_1D(config)
             % Constructor
             % Input: config struct with fields:
             %   - ell_h, ell_v, sigma_f: GP hyperparameters

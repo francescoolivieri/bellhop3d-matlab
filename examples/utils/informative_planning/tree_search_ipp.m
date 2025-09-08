@@ -1,12 +1,21 @@
-function data = tree_search_ipp(data, s, idx)
-    % Tree approach 
-    tree = generateTree(s.tree_depth);
+function next_pos = tree_search_ipp(current_pos, bounds, estimation_state, tree_depth)
+    % Tree-based IPP planning
+    % CURRENT_POS: [x y z] current position
+    % BOUNDS: struct with movement constraints (d_x, d_y, d_z, etc.)
+    % ESTIMATION_STATE: struct with sim_est, th_est, Sigma_est, Sigma_rr
+    % TREE_DEPTH: search depth (default: 1)
+    
+    if nargin < 4, tree_depth = 1; end
+    
+    tree = generateTree(tree_depth);
     
     tic
-    tree = traverseTree(tree, data.th_est(:, idx), data.Sigma_est(:, :, idx), ...
-        data.x(idx), data.y(idx), data.z(idx), data.sim_est, data.Sigma_rr);
+    tree = traverseTree(tree, estimation_state.th_est, estimation_state.Sigma_est, ...
+        current_pos(1), current_pos(2), current_pos(3), ...
+        estimation_state.sim_est, estimation_state.Sigma_rr);
     toc
     
     best_action = getBestActionSequence(tree);
-    [data.x(idx+1), data.y(idx+1), data.z(idx+1)] = update_pos(data.x(idx), data.y(idx), data.z(idx), s, best_action(1));
+    [next_x, next_y, next_z] = update_pos(current_pos(1), current_pos(2), current_pos(3), bounds, best_action(1));
+    next_pos = [next_x, next_y, next_z];
 end
