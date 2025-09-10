@@ -52,6 +52,21 @@ sim.plotTLSlice();
 > **Tip** `uw.Simulation` accepts a custom `scene` struct (fields `X`, `Y`, `floor`) if you want non-default bathymetry (`uw.SimSettings` has option to choose between flat, curves, gaussian features or fractal).
 
 ---
+## 🧭 Sensors & Motion Planning
+
+`uw.Sensor` represents a movable agent/receiver. A default sensor is created for each simulation.
+
+```matlab
+sim = uw.Simulation();
+sim.sensor.move([1.0 0.2 30]);      % absolute move
+sim.sensor.setStrategy("lawnmower");% configure once
+sim.sensor.step();                  % advance one step
+sim.sensor.lawnmower();             % use directly the function to perform the step
+```
+
+More strategies with name‑value parameters (e.g., `treeSearch("depth", 2, state)`), `setStrategy`/`step`, multi‑sensor usage, and custom extensions are in `docs/API_REFERENCE.md`.
+
+---
 ## 🔬 Scientific Workflows
 
 ### 1  Bottom-Parameter Estimation (UKF)
@@ -103,21 +118,6 @@ Run any example after `startup` – they automatically add `lib` to the path.
 * Bellhop3D using Altimetry file
 * Bathymetry more modulable (as of now if multiple types of sediment are present, the space is divided equally along the x axis)
 * Test results in the real world
-
-
----
-## 📄 Licence & Citation
-
-If you use this library, cite as:
-```bibtex
-@software{bellhop3d-matlab,
-  title        = {bellhop3d-matlab: Bellhop-3D MATLAB Abstraction Library},
-  author       = {Francesco Olivieri},
-  year         = {2025},
-  url          = {https://github.com/francescoolivieri/bellhop3d-matlab.git},
-  note         = {3-D acoustic propagation, Bayesian estimation, sensor planning}
-}
-```
 
 ---
 **Feel free to propose and actively improve the repository.**

@@ -10,16 +10,47 @@ function data = pos_next_measurement(data, s)
         % Select method based on settings
         switch s.ipp_method
             case 'tree_search'
-                % Optimized tree-based approach with memoization
-                data = tree_search_ipp(data, data.sim_true.settings, idx);
+                % Tree-based IPP planning (updated to use new signature)
+                current_pos = [data.x(idx), data.y(idx), data.z(idx)];
+                estimation_state = struct();
+                if isfield(data, 'sim_est'), estimation_state.sim_est = data.sim_est; end
+                if isfield(data, 'th_est'), estimation_state.th_est = data.th_est(:, idx); end
+                if isfield(data, 'Sigma_est'), estimation_state.Sigma_est = data.Sigma_est(:, :, idx); end
+                if isfield(data, 'Sigma_rr'), estimation_state.Sigma_rr = data.Sigma_rr; end
+                
+                depth = 1; if isfield(s, 'tree_depth'), depth = s.tree_depth; end
+                next_pos = tree_search_ipp(current_pos, s, estimation_state, depth);
+                data.x(idx+1) = next_pos(1);
+                data.y(idx+1) = next_pos(2);
+                data.z(idx+1) = next_pos(3);
 
             case 'rrt_star'
-                % RRT* based IPP planning
-                data = rrt_star_based_ipp(data, s, idx);
+                % RRT* based IPP planning (updated to use new signature)
+                current_pos = [data.x(idx), data.y(idx), data.z(idx)];
+                estimation_state = struct();
+                if isfield(data, 'sim_est'), estimation_state.sim_est = data.sim_est; end
+                if isfield(data, 'th_est'), estimation_state.th_est = data.th_est(:, idx); end
+                if isfield(data, 'Sigma_est'), estimation_state.Sigma_est = data.Sigma_est(:, :, idx); end
+                if isfield(data, 'Sigma_rr'), estimation_state.Sigma_rr = data.Sigma_rr; end
+                
+                next_pos = rrt_star_based_ipp(current_pos, s, estimation_state, 15, 1.0, 0.05, 8.0);
+                data.x(idx+1) = next_pos(1);
+                data.y(idx+1) = next_pos(2);
+                data.z(idx+1) = next_pos(3);
                 
             case 'information_gain'
-                % Information gain-based approach 
-                data = random_points_ipp(data, s, idx);
+                % Information gain-based approach (updated to use new signature)
+                current_pos = [data.x(idx), data.y(idx), data.z(idx)];
+                estimation_state = struct();
+                if isfield(data, 'sim_est'), estimation_state.sim_est = data.sim_est; end
+                if isfield(data, 'th_est'), estimation_state.th_est = data.th_est(:, idx); end
+                if isfield(data, 'Sigma_est'), estimation_state.Sigma_est = data.Sigma_est(:, :, idx); end
+                if isfield(data, 'Sigma_rr'), estimation_state.Sigma_rr = data.Sigma_rr; end
+                
+                next_pos = random_points_ipp(current_pos, s, estimation_state, 10, 3);
+                data.x(idx+1) = next_pos(1);
+                data.y(idx+1) = next_pos(2);
+                data.z(idx+1) = next_pos(3);
 
             case 'multi_objective' % NOT TESTED
                 % Multi-objective optimization approach

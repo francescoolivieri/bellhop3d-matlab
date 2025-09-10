@@ -1,14 +1,24 @@
-function data = rrt_star_based_ipp(data, s, idx)
+function next_pos = rrt_star_based_ipp(current_pos, bounds, estimation_state, max_iter, step_size, goal_bias, search_radius)
     % RRT* based IPP planning with path optimization
+    % CURRENT_POS: [x y z] current position
+    % BOUNDS: struct with movement constraints
+    % ESTIMATION_STATE: struct with sim_est, th_est, Sigma_est, Sigma_rr
+    % MAX_ITER: maximum iterations (default: 15)
+    % STEP_SIZE: step size (default: 1.0)
+    % GOAL_BIAS: goal bias (default: 0.05)
+    % SEARCH_RADIUS: search radius (default: 8.0)
     
-    % Initialize RRT* parameters
-    if ~isfield(s, 'rrt_max_iter'), s.rrt_max_iter = 15; end
-    if ~isfield(s, 'rrt_step_size'), s.rrt_step_size = 1; end
-    if ~isfield(s, 'rrt_goal_bias'), s.rrt_goal_bias = 0.05; end
-    if ~isfield(s, 'rrt_search_radius'), s.rrt_search_radius = 8.0; end
+    if nargin < 4, max_iter = 15; end
+    if nargin < 5, step_size = 1.0; end
+    if nargin < 6, goal_bias = 0.05; end
+    if nargin < 7, search_radius = 8.0; end
     
-    % Current position
-    current_pos = [data.x(idx), data.y(idx), data.z(idx)];
+    % Build RRT parameters struct for compatibility with existing code
+    s = bounds;
+    s.rrt_max_iter = max_iter;
+    s.rrt_step_size = step_size;
+    s.rrt_goal_bias = goal_bias;
+    s.rrt_search_radius = search_radius;
     
     % Build RRT* tree with path optimization
     rrt_star_tree = build_rrt_star_exploration_tree(current_pos, s);
@@ -22,7 +32,8 @@ function data = rrt_star_based_ipp(data, s, idx)
         pos = node.position;    
         
         if is_valid_position(pos, s)
-            info_gain = calculate_information_gain(data.sim_est, pos, data.th_est(:, idx), data.Sigma_est(:, :, idx), data.Sigma_rr);
+            info_gain = calculate_information_gain(estimation_state.sim_est, pos, ...
+                estimation_state.th_est, estimation_state.Sigma_est, estimation_state.Sigma_rr);
             path_cost = node.cost; % Cost from RRT* optimization
             
             % Combine information gain with path efficiency
@@ -35,9 +46,7 @@ function data = rrt_star_based_ipp(data, s, idx)
         end
     end
     
-    data.x(idx+1) = best_pos(1);
-    data.y(idx+1) = best_pos(2);
-    data.z(idx+1) = best_pos(3);
+    next_pos = best_pos;
 end
 
 

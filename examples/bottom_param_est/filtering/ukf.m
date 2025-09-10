@@ -1,22 +1,19 @@
-function data = ukf(data)
+function data = ukf(data, sim_est, measurement, position)
 
 % Get index of last state
-idx=find(isfinite(data.m),1,'last');
+idx = find(isfinite(data.th_est),1,'last');
 
-% Get the position of the sensor
-pos=[data.x(idx) data.y(idx) data.z(idx)];
-    
-% Get measurement
-m=data.m(:, idx);
+% Build forward model at current position
+fwd_model = @(theta) fwd_with_params(sim_est, data.th_names, theta, position);
 
-fwd_model = @(theta) fwd_with_params(data.sim_est, data.th_names, theta, pos);
+% Run one UKF update step
+[data.th_est(:, idx+1), data.Sigma_est(:, :, idx+1)] = step_ukf_filter( ...
+    measurement, fwd_model, ...
+    data.th_est(:, idx), data.Sigma_est(:, :, idx), data.Sigma_rr);
 
-% Update the filter state given the measurements
- [data.th_est(:, idx), data.Sigma_est(:, :, idx)]= step_ukf_filter( ...
-                m, fwd_model, ...
-                data.th_est(:, idx-1), data.Sigma_est(:, :, idx-1), data.Sigma_rr);
- 
- % If just values are passed, automatically update the estimates
- data.sim_est.params.update(data.th_est(:, idx));
+% Persist updated state and propagate to simulation parameters
+sim_est.params.update(data.th_est(:, idx+1));
 
 end
+
+

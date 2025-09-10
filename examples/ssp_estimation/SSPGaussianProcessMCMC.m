@@ -1,12 +1,9 @@
 classdef SSPGaussianProcessMCMC < handle
-    % SSPGaussianProcessMCMC - Gaussian Process for 3D Sound Speed Profile
-    % estimation using Markov Chain Monte Carlo (MCMC) methods.
-    %
-    % This class models the 3D SSP field as a Gaussian Process and uses a
-    % forward acoustic model (Bellhop) within an MCMC framework to
-    % find the posterior distribution of the SSP, conditioned on observed
-    % Transmission Loss (TL) measurements. This avoids the fragile step of
-    % inverting TL to a single sound speed value.
+    % SSPGaussianProcessMCMC  GP-based 3‑D SSP estimator using MCMC.
+    %   Models the 3‑D sound‑speed field as a Gaussian Process and uses the
+    %   forward acoustic model (Bellhop3‑D) inside an MCMC loop to infer the
+    %   SSP posterior from Transmission Loss (TL) measurements. Avoids the
+    %   unstable inversion of TL to local sound speed.
 
     properties (Access = public)
         % GP hyperparameters
@@ -49,11 +46,12 @@ classdef SSPGaussianProcessMCMC < handle
 
     methods
         function obj = SSPGaussianProcessMCMC(config)
-            % Constructor
-            % Input: config struct with fields:
-            %   - ell_h, ell_v, sigma_f: GP hyperparameters
-            %   - tl_noise_std: TL measurement noise (dB)
-            %   - mcmc_iterations, mcmc_burn_in, proposal_std: MCMC params
+            % SSPGaussianProcessMCMC  Construct estimator with configuration.
+            %   OBJ = SSPGaussianProcessMCMC(CONFIG)
+            %   CONFIG fields:
+            %     - ell_h, ell_v, sigma_f        GP hyperparameters
+            %     - tl_noise_std                 TL noise st.dev. (dB)
+            %     - mcmc_iterations, mcmc_burn_in, proposal_std
 
             % --- GP and Likelihood Hyperparameters ---
             obj.ell_h = config.ell_h;
@@ -84,13 +82,11 @@ classdef SSPGaussianProcessMCMC < handle
         end
 
         function update(obj, new_pos, new_tl_measurement, sim)
-            % Update the SSP estimate with a new TL measurement using MCMC.
-            % This is a computationally intensive operation.
-            %
-            % Inputs:
-            %   new_pos: [1 x 3] receiver position for the new measurement
-            %   new_tl_measurement: scalar TL value (dB)
-            %   sim: The Simulation object we are performing the SSP update on
+            % update  Assimilate one TL measurement via MCMC and refresh SSP.
+            %   update(OBJ, POS, TL, SIM)
+            %     POS – 1×3 [x y z] (km, km, m)
+            %     TL  – scalar TL measurement (dB)
+            %     SIM – uw.Simulation to evaluate the forward model
 
             fprintf('\n--- Starting MCMC Update ---\n');
             fprintf('New measurement at [%.1f, %.1f, %.1f]: %.1f dB\n', new_pos, new_tl_measurement);
@@ -151,8 +147,7 @@ classdef SSPGaussianProcessMCMC < handle
         end
         
         function updatePosteriorStats(obj)
-            % Calculate the mean and variance from the collected MCMC samples
-            % after discarding the burn-in period.
+            % updatePosteriorStats  Compute posterior mean/variance from samples.
             
             if isempty(obj.ssp_samples) || length(obj.ssp_samples) <= obj.mcmc_burn_in
                 warning('Not enough samples to update posterior. Using prior.');
@@ -174,8 +169,8 @@ classdef SSPGaussianProcessMCMC < handle
         end
 
         function log_p = calculate_log_posterior(obj, ssp_flat, sim)
-            % Calculates the log posterior probability of a given SSP field.
-            % log P(ssp | tl) = log P(tl | ssp) + log P(ssp)
+            % calculate_log_posterior  Log posterior: log P(SSP|TL).
+            %   log P = log P(TL|SSP) + log P(SSP)
             
             % 1. Calculate log-likelihood: log P(tl | ssp)
             log_likelihood = obj.calculate_log_likelihood(ssp_flat, sim);
@@ -195,7 +190,7 @@ classdef SSPGaussianProcessMCMC < handle
         end
 
         function log_likelihood = calculate_log_likelihood(obj, ssp_flat, sim)
-            % Calculates log P(tl_obs | ssp) using the forward model.
+            % calculate_log_likelihood  Log P(TL|SSP) via forward model.
             
             try
                 % --- Run the Forward Acoustic Model ---
@@ -222,8 +217,7 @@ classdef SSPGaussianProcessMCMC < handle
         end
         
         function log_prior = calculate_log_prior(obj, ssp_flat)
-            % Calculates the log prior probability of an SSP field, log P(ssp).
-            % This is given by the GP definition.
+            % calculate_log_prior  GP log prior probability of SSP field.
             delta = ssp_flat - obj.mu_prior_grid;
             
             % Using the Cholesky decomposition is more stable than inv(K_prior)
@@ -232,14 +226,14 @@ classdef SSPGaussianProcessMCMC < handle
         end
         
         function uncertainty_grid = getUncertaintyGrid(obj)
-            % Returns the standard deviation of the posterior SSP.
+            % getUncertaintyGrid  Posterior SSP standard deviation (m/s).
             uncertainty_grid = sqrt(obj.posterior_var_ssp);
         end
     end
     
     methods (Access = private)
         function setupMeanFunction(obj)
-            % Setup mean function from CTD data
+            % setupMeanFunction  Build depth‑only mean function from CTD.
             try
                 S = load('data/CTD.mat');
                 fn = fieldnames(S);
@@ -254,7 +248,7 @@ classdef SSPGaussianProcessMCMC < handle
         end
  
         function setupPredictionGrid(obj)
-            % Setup 3D prediction grid based on simulation settings
+            % setupPredictionGrid  Build 3‑D grid from SimSettings defaults.
             s = uw.SimSettings.default();
             obj.grid_x = s.Ocean_x_min:s.OceanGridStep:s.Ocean_x_max;
             obj.grid_y = s.Ocean_y_min:s.OceanGridStep:s.Ocean_y_max;
@@ -264,9 +258,7 @@ classdef SSPGaussianProcessMCMC < handle
         end
 
         function computePriorCovariance(obj)
-            % Pre-computes the large prior covariance matrix K and its
-            % Cholesky decomposition for the entire grid.
-            % This can be memory-intensive for large grids.
+            % computePriorCovariance  Prior K and Cholesky on full grid (heavy).
             M = size(obj.X_grid, 1);
             fprintf('Computing %d x %d prior covariance matrix...\n', M, M);
             
@@ -282,7 +274,7 @@ classdef SSPGaussianProcessMCMC < handle
         end
 
         function K = kernelMatrix(obj, X1, X2)
-            % Compute kernel matrix using the anisotropic squared exponential kernel
+            % kernelMatrix  Anisotropic SE kernel between point sets X1, X2.
             dx = pdist2(X1(:,1), X2(:,1)) * 1000; % km -> m
             dy = pdist2(X1(:,2), X2(:,2)) * 1000; % km -> m
             dz = pdist2(X1(:,3), X2(:,3));       % m

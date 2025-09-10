@@ -1,12 +1,8 @@
 classdef SSPGP_1D < handle
-    % SSPGaussianProcessMCMC - Gaussian Process for 3D Sound Speed Profile
-    % estimation using Markov Chain Monte Carlo (MCMC) methods.
-    %
-    % This class models the 3D SSP field as a Gaussian Process and uses a
-    % forward acoustic model (Bellhop) within an MCMC framework to
-    % find the posterior distribution of the SSP, conditioned on observed
-    % Transmission Loss (TL) measurements. This avoids the fragile step of
-    % inverting TL to a single sound speed value.
+    % SSPGP_1D  1‑D Gaussian‑Process SSP estimator with optional conditioning.
+    %   Prototype class for a simpler (1‑D vertical) SSP GP model. Supports
+    %   optional conditioning on direct SSP point observations and uses the
+    %   acoustic forward model to compute TL likelihoods.
 
     properties (Access = public)
         % GP hyperparameters
@@ -56,7 +52,7 @@ classdef SSPGP_1D < handle
     end
 
     methods
-        function obj = new_SSPGPMCMC_1D(config)
+        function obj = SSPGP_1D(config)
             % Constructor
             % Input: config struct with fields:
             %   - ell_h, ell_v, sigma_f: GP hyperparameters
