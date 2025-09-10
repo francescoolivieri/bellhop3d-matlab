@@ -1,5 +1,12 @@
 function ssp_est_final_plots(data, s, outpath)
-    % Final summary plots for SSP field estimation
+    % ssp_est_final_plots  Produce final SSP estimation summary figures.
+    %   ssp_est_final_plots(DATA, S, OUTPATH)
+    %     DATA.x/y/z – measurement path coordinates (vectors)
+    %     DATA.sim_true – uw.Simulation (for ground truth SSP)
+    %     DATA.sim_est  – uw.Simulation (optional for diagnostics)
+    %     DATA.ssp_estimator – estimator instance with posterior results
+    %     S – settings struct (limits, depths)
+    %     OUTPATH – folder to save figures (created if missing)
 
     idx_last = find(isfinite(data.x), 1, 'last');
     if isempty(idx_last) || idx_last < 1
@@ -122,11 +129,13 @@ function ssp_est_final_plots(data, s, outpath)
         
             n_meas = find(isfinite(data.x), 1, 'last');
             if ~isempty(n_meas) && n_meas > 0
-                rx = [data.x(2:n_meas)', data.y(2:n_meas)', data.z(2:n_meas)'];
+                rx = [data.x(2:n_meas), data.y(2:n_meas), data.z(2:n_meas)];
+
+                n_meas = n_meas - 1;
+                
                 tl_true = zeros(n_meas,1);
                 tl_est  = zeros(n_meas,1);
 
-                n_meas = n_meas - 1;
                 for ii=1:n_meas
                     tl_true(ii) = data.sim_true.computeTL(rx(ii,:));
                     tl_est(ii)  = data.sim_est.computeTL(rx(ii,:));

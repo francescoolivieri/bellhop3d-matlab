@@ -117,20 +117,5 @@ Run any example after `startup` – they automatically add `lib` to the path.
 * Bathymetry more modulable (as of now if multiple types of sediment are present, the space is divided equally along the x axis)
 * Test results in the real world
 
-
----
-## 📄 Licence & Citation
-
-If you use this library, cite as:
-```bibtex
-@software{bellhop3d-matlab,
-  title        = {bellhop3d-matlab: Bellhop-3D MATLAB Abstraction Library},
-  author       = {Francesco Olivieri},
-  year         = {2025},
-  url          = {https://github.com/francescoolivieri/bellhop3d-matlab.git},
-  note         = {3-D acoustic propagation, Bayesian estimation, sensor planning}
-}
-```
-
 ---
 **Feel free to propose and actively improve the repository.**

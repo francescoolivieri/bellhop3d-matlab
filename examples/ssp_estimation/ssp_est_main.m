@@ -1,4 +1,4 @@
-% ssp_estimation_main.m
+% ssp_est_main  SSP field estimation demo using GP + MCMC.
 clc
 close all;
 
@@ -20,7 +20,6 @@ sim_true = uw.Simulation();
 % Estimation world
 sim_est = uw.Simulation();
 sim_est.params.setEstimationParameterNames(data.th_names); 
-sim_est.params.update(data.th_est, data.th_names);
 
 
 % Configure a simple default strategy for SSP example
@@ -37,7 +36,7 @@ config.tl_noise_std = 2.; % measurement noise
 
 % MCMC Sample Parameters
 % Should tune these
-config.mcmc_iterations = 30; % Total steps in the MCMC chain (more the better)
+config.mcmc_iterations = 10; % Total steps in the MCMC chain (more the better)
 config.mcmc_burn_in = 3;      % Steps to discard to let the chain converge
 config.proposal_std = 0.05;   % Scales the size of MCMC proposal steps.
 
