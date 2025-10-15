@@ -5,7 +5,7 @@ Bellhop3d-matlab wraps **BELLHOP3D** acoustic toolbox in a object-oriented MATLA
 Note: the library was developed using the linux version of Bellhop-3D.
 
 ---
-## ✨ Key Features
+## Key Features
 
 | Area | Highlights |
 |------|------------|
@@ -52,7 +52,7 @@ sim.plotTLSlice();
 > **Tip** `uw.Simulation` accepts a custom `scene` struct (fields `X`, `Y`, `floor`) if you want non-default bathymetry (`uw.SimSettings` has option to choose between flat, curves, gaussian features or fractal).
 
 ---
-## 🧭 Sensors & Motion Planning
+## Sensors & Motion Planning
 
 `uw.Sensor` represents a movable agent/receiver. A default sensor is created for each simulation.
 
@@ -67,7 +67,7 @@ sim.sensor.lawnmower();             % use directly the function to perform the s
 More strategies with name‑value parameters (e.g., `treeSearch("depth", 2, state)`), `setStrategy`/`step`, multi‑sensor usage, and custom extensions are in `docs/API_REFERENCE.md`.
 
 ---
-## 🔬 Scientific Workflows
+## Scientific Workflows
 
 ### 1  Bottom-Parameter Estimation (UKF)
 *Script: `examples/bottom_param_est/params_est_main.m`
@@ -102,7 +102,7 @@ lib/+uw/
 Legacy research code is retained in `src/` but will migrate into namespaced packages over time.
 
 ---
-## 📊 Implemented Examples
+## Implemented Examples
 | File | Description |
 |------|-------------|
 | `examples/params_est_main.m` | Bottom parameter estimation with UKF + IPP |
@@ -112,7 +112,7 @@ Legacy research code is retained in `src/` but will migrate into namespaced pack
 Run any example after `startup` – they automatically add `lib` to the path.
 
 ---
-## 🛣️ Future work
+## Future work
 * Full GP-based SSP inversion example & ray-tracing visualiser
 * Possibility to add multiple sources to the simulation
 * Bellhop3D using Altimetry file
@@ -120,4 +120,3 @@ Run any example after `startup` – they automatically add `lib` to the path.
 * Test results in the real world
 
 ---
-**Feel free to propose and actively improve the repository.**
